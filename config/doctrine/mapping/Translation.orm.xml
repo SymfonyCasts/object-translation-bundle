@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <mapped-superclass name="SymfonyCasts\ObjectTranslationBundle\Model\Translation">
+        <field name="objectType" column="object_type" type="string" />
+        <field name="objectId" column="object_id" type="string" />
+        <field name="locale" type="string" />
+        <field name="field" type="string" />
+        <field name="value" type="text" />
+    </mapped-superclass>
+</doctrine-mapping>
