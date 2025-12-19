@@ -23,7 +23,7 @@
         "php": ">=8.2",
         "symfony/framework-bundle": "^6.4|^7.0",
         "symfony/translation": "^6.4|^7.0",
-        "doctrine/doctrine-bundle": "^2.18",
+        "doctrine/doctrine-bundle": "^2.18|^3.0",
         "doctrine/orm": "^3.5"
     },
     "require-dev": {
