@@ -16,7 +16,7 @@ final class ObjectTranslationBundle extends AbstractBundle
 
     public function configure(DefinitionConfigurator $definition): void
     {
-        $definition->rootNode() // @phpstan-ignore method.notFound
+        $definition->rootNode()
             ->children()
                 ->scalarNode('translation_class')
                     ->info('The class name of your Translation entity.')

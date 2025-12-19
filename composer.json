@@ -21,14 +21,14 @@
     ],
     "require": {
         "php": ">=8.2",
-        "symfony/framework-bundle": "^6.4|^7.0",
-        "symfony/translation": "^6.4|^7.0",
+        "symfony/framework-bundle": "^6.4|^7.0|^8.0",
+        "symfony/translation": "^6.4|^7.0|^8.0",
         "doctrine/doctrine-bundle": "^2.18|^3.0",
         "doctrine/orm": "^3.5"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6",
-        "symfony/phpunit-bridge": "^7.3",
+        "symfony/phpunit-bridge": "^7.4||^8.0",
         "zenstruck/foundry": "^2.8",
         "php-cs-fixer/shim": "^3.90",
         "phpstan/phpstan": "^2.1",
