@@ -101,4 +101,20 @@ class TranslationManagerTest extends KernelTestCase
         $translated = $translator->translate($entity, 'de');
         $this->assertSame('new_value', $translated->property1);
     }
+
+    public function testGetObjectsForType(): void
+    {
+        persist(Entity1::class, ['property1' => 'v1']);
+        persist(Entity1::class, ['property1' => 'v2']);
+
+        $objects = $this->manager->getObjectsForType(Entity1::class);
+
+        $this->assertInstanceOf(\Generator::class, $objects);
+        $count = 0;
+        foreach ($objects as $object) {
+            $this->assertInstanceOf(Entity1::class, $object);
+            ++$count;
+        }
+        $this->assertSame(2, $count);
+    }
 }

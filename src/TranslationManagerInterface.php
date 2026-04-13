@@ -22,7 +22,7 @@ interface TranslationManagerInterface
     /**
      * @param class-string $class e.g. Product::class
      *
-     * @return iterable<object>
+     * @return iterable<object> An iterator for objects of the given type, for memory efficiency
      */
     public function getObjectsForType(string $class): iterable;
 
