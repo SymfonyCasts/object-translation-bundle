@@ -40,7 +40,17 @@ final class TranslationManager implements TranslationManagerInterface
 
     public function getObjectsForType(string $class): iterable
     {
-        return $this->doctrine->getRepository($class)->findAll();
+        $manager = $this->doctrine->getManagerForClass($class);
+
+        if (!$manager instanceof \Doctrine\ORM\EntityManagerInterface) {
+            throw new \LogicException(sprintf('Manager for class "%s" must be an instance of EntityManagerInterface.', $class));
+        }
+
+        return $manager->createQueryBuilder()
+            ->select('o')
+            ->from($class, 'o')
+            ->getQuery()
+            ->toIterable();
     }
 
     public function findTranslation(object $entity, string $locale, string $field): ?string
