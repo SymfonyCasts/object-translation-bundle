@@ -14,12 +14,14 @@ interface TranslationManagerInterface
 
     /**
      * @param class-string $class e.g. Product::class
+     *
      * @return list<string>
      */
     public function getTranslatableFields(string $class): array;
 
     /**
      * @param class-string $class e.g. Product::class
+     *
      * @return iterable<object>
      */
     public function getObjectsForType(string $class): iterable;
@@ -47,6 +49,7 @@ interface TranslationManagerInterface
 
     /**
      * Delete all translations for a class; optionally scoped to a locale.
+     *
      * @param class-string $class e.g. Product::class
      */
     public function deleteTranslationsForType(string $class, ?string $locale = null): void;
