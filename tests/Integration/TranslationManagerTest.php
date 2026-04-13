@@ -6,9 +6,9 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
 use SymfonyCasts\ObjectTranslationBundle\ObjectTranslator;
-use SymfonyCasts\ObjectTranslationBundle\TranslationManagerInterface;
 use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Entity1;
 use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Translation;
+use SymfonyCasts\ObjectTranslationBundle\TranslationManagerInterface;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -30,7 +30,7 @@ class TranslationManagerTest extends KernelTestCase
     public function testGetTranslatableTypes(): void
     {
         $types = $this->manager->getTranslatableTypes();
-        
+
         $this->assertCount(1, $types);
         $this->assertInstanceOf(TranslatableTypeInfo::class, $types[0]);
         $this->assertSame('entity1', $types[0]->name);
@@ -50,7 +50,7 @@ class TranslationManagerTest extends KernelTestCase
 
         // Save
         $this->manager->saveTranslation($entity, 'de', 'property1', 'de_v1');
-        
+
         // Find
         $this->assertSame('de_v1', $this->manager->findTranslation($entity, 'de', 'property1'));
         $this->assertSame(['property1' => 'de_v1'], $this->manager->findTranslations($entity, 'de'));
@@ -80,7 +80,7 @@ class TranslationManagerTest extends KernelTestCase
         ]);
 
         $translator = self::getContainer()->get(ObjectTranslator::class);
-        
+
         // Prime cache
         $translated = $translator->translate($entity, 'de');
         $this->assertSame('old_value', $translated->property1);
