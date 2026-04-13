@@ -123,4 +123,75 @@ final class TranslatableMappingManager
         $om->persist($translation);
         $om->flush();
     }
+    public function delete(string $type, string $id, string $locale, ?string $field = null): void
+    {
+        $om = $this->doctrine->getManagerForClass($this->translationClass);
+        $qb = $om->createQueryBuilder()
+            ->delete($this->translationClass, 't')
+            ->where('t.objectType = :type')
+            ->andWhere('t.objectId = :id')
+            ->andWhere('t.locale = :locale')
+            ->setParameter('type', $type)
+            ->setParameter('id', $id)
+            ->setParameter('locale', $locale);
+
+        if ($field) {
+            $qb->andWhere('t.field = :field')
+                ->setParameter('field', $field);
+        }
+
+        $qb->getQuery()->execute();
+    }
+
+    public function deleteForType(string $type, ?string $locale = null): void
+    {
+        $om = $this->doctrine->getManagerForClass($this->translationClass);
+        $qb = $om->createQueryBuilder()
+            ->delete($this->translationClass, 't')
+            ->where('t.objectType = :type')
+            ->setParameter('type', $type);
+
+        if ($locale) {
+            $qb->andWhere('t.locale = :locale')
+                ->setParameter('locale', $locale);
+        }
+
+        $qb->getQuery()->execute();
+    }
+
+    public function getTranslatableTypeMap(): array
+    {
+        $map = [];
+
+        foreach ($this->doctrine->getManagers() as $om) {
+            foreach ($om->getMetadataFactory()->getAllMetadata() as $metadata) {
+                $class = $metadata->getName();
+                $reflectionClass = new \ReflectionClass($class);
+                $attribute = $reflectionClass->getAttributes(Translatable::class)[0] ?? null;
+
+                if (!$attribute) {
+                    continue;
+                }
+
+                $type = $attribute->newInstance()->name;
+                $map[$type] = $class;
+            }
+        }
+
+        return $map;
+    }
+
+    public function getTranslatableFieldsForClass(string $class): array
+    {
+        $reflectionClass = new \ReflectionClass($class);
+        $fields = [];
+
+        foreach ($reflectionClass->getProperties() as $property) {
+            if ($property->getAttributes(TranslatableProperty::class)) {
+                $fields[] = $property->getName();
+            }
+        }
+
+        return $fields;
+    }
 }
