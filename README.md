@@ -173,6 +173,57 @@ symfony console object-translation:import translations_fr.csv fr
 The first argument is the path to the CSV file, and the second argument is the locale
 of the translations in that file.
 
+## Translation Management API
+
+If you want to build a custom administration interface for managing translations in your application (e.g. using Symfony UX, React or plain PHP), the bundle provides a stable `TranslationManagerInterface`. This interface allows you to access translations programmatically without needing to interact directly with the database or internal services.
+
+### `TranslationManager` Service
+
+You can inject `TranslationManagerInterface` (an alias for `TranslationManager`) to perform CRUD operations, retrieve translation status, or invalidate the cache.
+
+```php
+use SymfonyCasts\ObjectTranslationBundle\TranslationManagerInterface;
+
+class TranslationAdminController
+{
+    public function edit(Product $product, TranslationManagerInterface $translationManager)
+    {
+        // Save a translation for a specific field and locale
+        $translationManager->saveTranslation($product, 'sk', 'name', 'Názov produktu');
+        
+        // Save multiple translations at once
+        $translationManager->saveTranslations($product, 'sk', [
+            'name' => 'Názov produktu',
+            'description' => 'Dlhý popis produktu...',
+        ]);
+
+        // Get all saved translations for a given entity and locale
+        $translations = $translationManager->findTranslations($product, 'sk'); // returns ['name' => '...', ...]
+
+        // Get translation status (which fields are filled and which are missing)
+        $status = $translationManager->getTranslationStatus($product, 'sk');
+        $status->getCompletionPercentage(); // e.g. 0.85 (85%)
+        $status->missingFields; // list of fields that are not yet translated
+
+        // Manually invalidate cache for this entity
+        $translationManager->invalidateCacheForEntity($product);
+    }
+}
+```
+
+For automatic discovery of translatable entities, you can use:
+
+```php
+// Get list of all classes marked with #[Translatable] attribute
+$types = $translationManager->getTranslatableTypes(); // returns list<TranslatableTypeInfo>
+
+// Get fields for a specific class
+$fields = $translationManager->getTranslatableFields(Product::class);
+
+// Get all objects of a given class (useful for lists in administration)
+$objects = $translationManager->getObjectsForType(Product::class);
+```
+
 ## Translation Caching
 
 For performance, translations are cached. By default, they use your `cache.app` pool
