@@ -25,7 +25,6 @@ class TranslatableMappingManagerIntegrationTest extends KernelTestCase
         $translator = self::getContainer()->get(ObjectTranslator::class);
         $reflection = new \ReflectionClass($translator);
         $property = $reflection->getProperty('mappingManager');
-        $property->setAccessible(true);
         $this->manager = $property->getValue($translator);
     }
 
