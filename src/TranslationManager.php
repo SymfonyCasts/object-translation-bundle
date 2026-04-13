@@ -13,7 +13,6 @@ final class TranslationManager implements TranslationManagerInterface
     public function __construct(
         private TranslatableMappingManager $mappingManager,
         private ManagerRegistry $doctrine,
-        private string $translationClass,
         private ?CacheInterface $cache = null,
     ) {
     }

@@ -4,8 +4,8 @@ namespace SymfonyCasts\ObjectTranslationBundle\Tests\Unit;
 
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
-use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
 use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Entity1;
+use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
 
 class TranslatableMappingManagerTest extends TestCase
 {
@@ -30,7 +30,7 @@ class TranslatableMappingManagerTest extends TestCase
     public function testGetTranslatableTypeMap(): void
     {
         $this->doctrine->method('getManagers')->willReturn([]);
-        
+
         // This test might be more complex because allTranslatableObjects() iterates over managers
         // and metadata. Let's see if we can mock that easily or if it's better in Integration test.
         $map = $this->manager->getTranslatableTypeMap();

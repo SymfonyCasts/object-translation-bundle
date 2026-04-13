@@ -2,6 +2,7 @@
 
 namespace SymfonyCasts\ObjectTranslationBundle;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Proxy;
 use SymfonyCasts\ObjectTranslationBundle\Mapping\Translatable;
@@ -127,6 +128,11 @@ final class TranslatableMappingManager
     public function delete(string $type, string $id, string $locale, ?string $field = null): void
     {
         $om = $this->doctrine->getManagerForClass($this->translationClass);
+
+        if (!$om instanceof EntityManagerInterface) {
+            throw new \LogicException(sprintf('Object manager for class "%s" must be an instance of EntityManagerInterface', $this->translationClass));
+        }
+
         $qb = $om->createQueryBuilder()
             ->delete($this->translationClass, 't')
             ->where('t.objectType = :type')
@@ -147,6 +153,11 @@ final class TranslatableMappingManager
     public function deleteForType(string $type, ?string $locale = null): void
     {
         $om = $this->doctrine->getManagerForClass($this->translationClass);
+
+        if (!$om instanceof EntityManagerInterface) {
+            throw new \LogicException(sprintf('Object manager for class "%s" must be an instance of EntityManagerInterface', $this->translationClass));
+        }
+
         $qb = $om->createQueryBuilder()
             ->delete($this->translationClass, 't')
             ->where('t.objectType = :type')

@@ -68,7 +68,5 @@ final class ObjectTranslationBundle extends AbstractBundle
 
         $builder->getDefinition('.symfonycasts.object_translator.mapping_manager')
             ->setArgument(0, $config['translation_class']);
-
-        $translationManagerDef->setArgument(2, $config['translation_class']);
     }
 }

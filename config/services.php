@@ -31,7 +31,6 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 service('.symfonycasts.object_translator.mapping_manager'),
                 service('doctrine'),
-                abstract_arg('Translation class'),
                 service('.symfonycasts.object_translator.cache'),
             ])
 

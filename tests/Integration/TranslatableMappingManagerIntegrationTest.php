@@ -4,9 +4,8 @@ namespace SymfonyCasts\ObjectTranslationBundle\Tests\Integration;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use SymfonyCasts\ObjectTranslationBundle\ObjectTranslator;
-use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
-use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Entity1;
 use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Translation;
+use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
