@@ -123,6 +123,7 @@ final class TranslatableMappingManager
         $om->persist($translation);
         $om->flush();
     }
+
     public function delete(string $type, string $id, string $locale, ?string $field = null): void
     {
         $om = $this->doctrine->getManagerForClass($this->translationClass);

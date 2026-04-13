@@ -3,10 +3,10 @@
 namespace SymfonyCasts\ObjectTranslationBundle;
 
 use Doctrine\Persistence\ManagerRegistry;
-use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
-use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
+use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
 
 final class TranslationManager implements TranslationManagerInterface
 {
