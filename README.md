@@ -230,3 +230,7 @@ symfonycasts_object_translation:
         # The time-to-livefor cached translations, in seconds, null for no expiration.
         ttl:                  null
 ```
+
+## Security Policy
+
+If you discover a security vulnerability, please do not open a public issue or pull request. Instead, please review this repository's [Security Policy](https://github.com/SymfonyCasts/object-translation-bundle/security) for instructions on how to report it responsibly.
