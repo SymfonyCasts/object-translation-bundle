@@ -29,10 +29,21 @@ class TestKernel extends Kernel
     {
         $builder->loadFromExtension('framework', [
             'test' => true,
+            'cache' => [
+                'pools' => [
+                    'cache.object_translation' => [
+                        'adapter' => 'cache.adapter.array',
+                        'tags' => true,
+                    ],
+                ],
+            ],
         ]);
 
         $builder->loadFromExtension('symfonycasts_object_translation', [
             'translation_class' => Translation::class,
+            'cache' => [
+                'pool' => 'cache.object_translation',
+            ],
         ]);
 
         $builder->loadFromExtension('doctrine', [

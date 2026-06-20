@@ -54,7 +54,11 @@ final class ObjectTranslator
             "object_translation.{$locale}.{$type}.{$id}",
             function (ItemInterface $item) use ($locale, $type, $id) {
                 if ($this->cache instanceof TagAwareCacheInterface) {
-                    $item->tag(['object-translation', "object-translation-{$type}"]);
+                    $item->tag([
+                        'object-translation',
+                        "object-translation-{$type}",
+                        "object-translation-{$type}-{$id}",
+                    ]);
                 }
 
                 if ($this->cacheTtl) {

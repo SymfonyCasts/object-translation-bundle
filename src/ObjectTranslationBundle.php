@@ -6,7 +6,6 @@ use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappi
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use SymfonyCasts\ObjectTranslationBundle\Model\Translation;
 
@@ -60,9 +59,10 @@ final class ObjectTranslationBundle extends AbstractBundle
         $container->import('../config/services.php');
 
         $objectTranslatorDef = $builder->getDefinition('symfonycasts.object_translator');
+        $translationManagerDef = $builder->getDefinition('symfonycasts.object_translation_manager');
 
         if ($config['cache']['enabled']) {
-            $objectTranslatorDef->setArgument(3, new Reference($config['cache']['pool']));
+            $builder->setAlias('.symfonycasts.object_translator.cache', $config['cache']['pool']);
             $objectTranslatorDef->setArgument(4, $config['cache']['ttl']);
         }
 
