@@ -60,7 +60,7 @@ interface TranslationManagerInterface
 
     // --- Cache ---
 
-    public function invalidateCacheForEntity(object $entity): void;
+    public function invalidateCacheForEntity(object $entity, ?string $locale = null): void;
 
     /** @param class-string $class e.g. Product::class */
     public function invalidateCacheForType(string $class): void;

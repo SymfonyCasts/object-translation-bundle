@@ -3,8 +3,6 @@
 namespace SymfonyCasts\ObjectTranslationBundle;
 
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
 
@@ -13,7 +11,7 @@ final class TranslationManager implements TranslationManagerInterface
     public function __construct(
         private TranslatableMappingManager $mappingManager,
         private ManagerRegistry $doctrine,
-        private ?CacheInterface $cache = null,
+        private TranslationCache $cache,
     ) {
     }
 
@@ -82,7 +80,7 @@ final class TranslationManager implements TranslationManagerInterface
             $this->mappingManager->upsert($type, $id, $locale, $field, $value);
         }
 
-        $this->invalidateCacheForEntity($entity);
+        $this->cache->invalidateObject($type, $id, $locale);
     }
 
     public function deleteTranslation(object $entity, string $locale, ?string $field = null): void
@@ -91,7 +89,7 @@ final class TranslationManager implements TranslationManagerInterface
         $id = $this->mappingManager->idFor($entity);
 
         $this->mappingManager->delete($type, $id, $locale, $field);
-        $this->invalidateCacheForEntity($entity);
+        $this->cache->invalidateObject($type, $id, $locale);
     }
 
     public function deleteTranslationsForType(string $class, ?string $locale = null): void
@@ -104,7 +102,7 @@ final class TranslationManager implements TranslationManagerInterface
         }
 
         $this->mappingManager->deleteForType($type, $locale);
-        $this->invalidateCacheForType($class);
+        $this->cache->invalidateType($type, $this->mappingManager->idsFor($class), $locale);
     }
 
     public function getTranslationStatus(object $entity, string $locale): TranslationStatus
@@ -134,38 +132,36 @@ final class TranslationManager implements TranslationManagerInterface
         );
     }
 
-    public function invalidateCacheForEntity(object $entity): void
+    public function invalidateCacheForEntity(object $entity, ?string $locale = null): void
     {
-        if (!$this->cache instanceof TagAwareCacheInterface) {
-            return;
-        }
-
         $type = $this->mappingManager->translatableTypeFor($entity);
         $id = $this->mappingManager->idFor($entity);
 
-        $this->cache->invalidateTags(["object-translation-{$type}-{$id}"]);
+        $this->cache->invalidateObject($type, $id, $locale);
     }
 
     public function invalidateCacheForType(string $class): void
     {
-        if (!$this->cache instanceof TagAwareCacheInterface) {
-            return;
-        }
-
         $map = $this->mappingManager->getTranslatableTypeMap();
         $type = array_search($class, $map, true);
 
         if ($type) {
-            $this->cache->invalidateTags(["object-translation-{$type}"]);
+            $this->cache->invalidateType($type, $this->mappingManager->idsFor($class));
         }
     }
 
     public function invalidateAllTranslationCache(): void
     {
-        if (!$this->cache instanceof TagAwareCacheInterface) {
-            return;
-        }
+        $this->cache->invalidateAll($this->idsByType());
+    }
 
-        $this->cache->invalidateTags(['object-translation']);
+    /**
+     * @return \Generator<string, iterable<string>>
+     */
+    private function idsByType(): \Generator
+    {
+        foreach ($this->mappingManager->getTranslatableTypeMap() as $type => $class) {
+            yield $type => $this->mappingManager->idsFor($class);
+        }
     }
 }

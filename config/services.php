@@ -2,11 +2,11 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Symfony\Component\Cache\Adapter\NullAdapter;
 use SymfonyCasts\ObjectTranslationBundle\Command\ObjectTranslationExportCommand;
 use SymfonyCasts\ObjectTranslationBundle\Command\ObjectTranslationImportCommand;
 use SymfonyCasts\ObjectTranslationBundle\Command\ObjectTranslationWarmupCommand;
 use SymfonyCasts\ObjectTranslationBundle\ObjectTranslator;
+use SymfonyCasts\ObjectTranslationBundle\TranslationCache;
 use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
 use SymfonyCasts\ObjectTranslationBundle\TranslationManagerInterface;
 use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
@@ -42,7 +42,12 @@ return static function (ContainerConfigurator $container) {
                 service('doctrine'),
             ])
 
-        ->set('.symfonycasts.object_translator.cache', NullAdapter::class)
+        ->set('.symfonycasts.object_translator.cache', TranslationCache::class)
+            ->args([
+                null,
+                null,
+                param('kernel.enabled_locales'),
+            ])
 
         ->set('.symfonycasts.object_translator.warmup_command', ObjectTranslationWarmupCommand::class)
             ->args([
@@ -62,6 +67,7 @@ return static function (ContainerConfigurator $container) {
         ->set('.symfonycasts.object_translator.import_command', ObjectTranslationImportCommand::class)
             ->args([
                 service('.symfonycasts.object_translator.mapping_manager'),
+                service('.symfonycasts.object_translator.cache'),
             ])
             ->tag('console.command')
 

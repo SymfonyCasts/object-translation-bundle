@@ -2,24 +2,16 @@
 
 namespace SymfonyCasts\ObjectTranslationBundle;
 
-use Symfony\Component\Cache\Adapter\NullAdapter;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Contracts\Translation\LocaleAwareInterface;
 
 final class ObjectTranslator
 {
-    private CacheInterface $cache;
-
     public function __construct(
         private LocaleAwareInterface $localeAware,
         private string $defaultLocale,
         private TranslatableMappingManager $mappingManager,
-        ?CacheInterface $cache = null,
-        private ?int $cacheTtl = null,
+        private TranslationCache $cache,
     ) {
-        $this->cache = $cache ?? new NullAdapter();
     }
 
     /**
@@ -51,23 +43,11 @@ final class ObjectTranslator
         $id = $this->mappingManager->idFor($object);
 
         return $this->cache->get(
-            "object_translation.{$locale}.{$type}.{$id}",
-            function (ItemInterface $item) use ($locale, $type, $id) {
-                if ($this->cache instanceof TagAwareCacheInterface) {
-                    $item->tag([
-                        'object-translation',
-                        "object-translation-{$type}",
-                        "object-translation-{$type}-{$id}",
-                    ]);
-                }
-
-                if ($this->cacheTtl) {
-                    $item->expiresAfter($this->cacheTtl);
-                }
-
-                return $this->mappingManager->translationsFor($locale, $type, $id);
-            },
-            $forceRefresh ? \INF : null,
+            $locale,
+            $type,
+            $id,
+            fn () => $this->mappingManager->translationsFor($locale, $type, $id),
+            $forceRefresh,
         );
     }
 }

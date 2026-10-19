@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
+use SymfonyCasts\ObjectTranslationBundle\TranslationCache;
 
 /**
  * @internal
@@ -21,6 +22,7 @@ final class ObjectTranslationImportCommand extends Command
 {
     public function __construct(
         private TranslatableMappingManager $mappingManager,
+        private TranslationCache $cache,
     ) {
         parent::__construct();
     }
@@ -52,6 +54,7 @@ final class ObjectTranslationImportCommand extends Command
             [$type, $id, $field, $value] = $row;
 
             $this->mappingManager->upsert($type, $id, $locale, $field, $value);
+            $this->cache->invalidateObject($type, $id, $locale);
 
             $io->progressAdvance();
         }
