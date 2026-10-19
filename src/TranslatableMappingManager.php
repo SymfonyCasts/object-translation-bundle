@@ -4,6 +4,7 @@ namespace SymfonyCasts\ObjectTranslationBundle;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Proxy;
+use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
 use SymfonyCasts\ObjectTranslationBundle\Mapping\Translatable;
 use SymfonyCasts\ObjectTranslationBundle\Mapping\TranslatableProperty;
 use SymfonyCasts\ObjectTranslationBundle\Model\Translation;
@@ -67,22 +68,31 @@ final class TranslatableMappingManager
         return $translationValues;
     }
 
+    /**
+     * @return iterable<TranslatableTypeInfo, object>
+     */
     public function allTranslatableObjects(): iterable
     {
-        foreach ($this->translatableClasses() as $class) {
-            yield from $this->doctrine->getRepository($class)->findAll();
+        foreach ($this->translatableTypes() as $type) {
+            foreach ($this->doctrine->getRepository($type->class)->findAll() as $object) {
+                yield $type => $object;
+            }
         }
     }
 
     /**
-     * @return array<string, class-string> type => class
+     * @return list<TranslatableTypeInfo>
      */
     public function translatableTypes(): array
     {
         $types = [];
 
         foreach ($this->translatableClasses() as $class) {
-            $types[$this->translatableTypeFor($class)] = $class;
+            $types[] = new TranslatableTypeInfo(
+                $this->translatableTypeFor($class),
+                $class,
+                $this->translatableFieldsFor($class),
+            );
         }
 
         return $types;

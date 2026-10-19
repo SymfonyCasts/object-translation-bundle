@@ -18,17 +18,7 @@ final class TranslationManager
      */
     public function translatableTypes(): array
     {
-        $types = [];
-
-        foreach ($this->mappingManager->translatableTypes() as $name => $class) {
-            $types[] = new TranslatableTypeInfo(
-                $name,
-                $class,
-                $this->mappingManager->translatableFieldsFor($class)
-            );
-        }
-
-        return $types;
+        return $this->mappingManager->translatableTypes();
     }
 
     /**
