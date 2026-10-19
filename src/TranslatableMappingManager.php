@@ -141,7 +141,7 @@ final class TranslatableMappingManager
         $this->doctrine->getManagerForClass($this->translationClass)->flush();
     }
 
-    public function delete(string $type, string $id, string $locale, ?string $field = null): void
+    public function delete(string $type, string $id, ?string $locale = null, ?string $field = null): void
     {
         $om = $this->doctrine->getManagerForClass($this->translationClass);
 
@@ -153,10 +153,13 @@ final class TranslatableMappingManager
             ->delete($this->translationClass, 't')
             ->where('t.objectType = :type')
             ->andWhere('t.objectId = :id')
-            ->andWhere('t.locale = :locale')
             ->setParameter('type', $type)
-            ->setParameter('id', $id)
-            ->setParameter('locale', $locale);
+            ->setParameter('id', $id);
+
+        if ($locale) {
+            $qb->andWhere('t.locale = :locale')
+                ->setParameter('locale', $locale);
+        }
 
         if ($field) {
             $qb->andWhere('t.field = :field')

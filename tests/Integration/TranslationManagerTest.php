@@ -68,16 +68,35 @@ class TranslationManagerTest extends KernelTestCase
         $this->assertNull($this->manager->findTranslation($entity, 'de', 'property1'));
     }
 
-    public function testDeleteTranslations(): void
+    public function testDeleteTranslationsForLocale(): void
     {
         $entity = persist(Entity1::class, ['property1' => 'v1']);
         $this->manager->saveTranslation($entity, 'de', 'property1', 'de_v1');
         $this->manager->saveTranslation($entity, 'fr', 'property1', 'fr_v1');
 
-        $this->manager->deleteTranslations($entity, 'de');
+        $this->manager->deleteTranslationsFor($entity, 'de');
 
         $this->assertSame([], $this->manager->findTranslations($entity, 'de'));
         $this->assertSame(['property1' => 'fr_v1'], $this->manager->findTranslations($entity, 'fr'));
+    }
+
+    public function testDeleteTranslationsForAllLocales(): void
+    {
+        $entity = persist(Entity1::class, ['property1' => 'v1']);
+        $other = persist(Entity1::class, ['property1' => 'v2']);
+        $this->manager->saveTranslation($entity, 'de', 'property1', 'de_v1');
+        $this->manager->saveTranslation($entity, 'fr', 'property1', 'fr_v1');
+        $this->manager->saveTranslation($other, 'de', 'property1', 'de_v2');
+
+        $translator = self::getContainer()->get(ObjectTranslator::class);
+        $this->assertSame('fr_v1', $translator->translate($entity, 'fr')->property1);
+
+        $this->manager->deleteTranslationsFor($entity);
+
+        $this->assertSame([], $this->manager->findTranslations($entity, 'de'));
+        $this->assertSame([], $this->manager->findTranslations($entity, 'fr'));
+        $this->assertSame(['property1' => 'de_v2'], $this->manager->findTranslations($other, 'de'));
+        $this->assertSame('v1', $translator->translate($entity, 'fr')->property1);
     }
 
     public function testSaveTranslationsRejectsUnknownFields(): void

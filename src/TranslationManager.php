@@ -90,7 +90,7 @@ final class TranslationManager
         $this->delete($entity, $locale, $field);
     }
 
-    public function deleteTranslations(object $entity, string $locale): void
+    public function deleteTranslationsFor(object $entity, ?string $locale = null): void
     {
         $this->delete($entity, $locale);
     }
@@ -130,7 +130,7 @@ final class TranslationManager
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
-    private function delete(object $entity, string $locale, ?string $field = null): void
+    private function delete(object $entity, ?string $locale, ?string $field = null): void
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
         $id = $this->mappingManager->idFor($entity);
