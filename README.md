@@ -195,7 +195,7 @@ class TranslationAdminController
         // Save a translation for a specific field and locale
         $translationManager->saveTranslation($product, 'sk', 'name', 'Názov produktu');
 
-        // Save multiple translations at once
+        // Save multiple translations at once (a null value deletes that field's translation)
         $translationManager->saveTranslationsFor($product, 'sk', [
             'name' => 'Názov produktu',
             'description' => 'Dlhý popis produktu...',
@@ -224,6 +224,37 @@ $types = $translationManager->translatableTypes();
 // Get fields for a specific class or object
 $fields = $translationManager->translatableFieldsFor(Product::class);
 ```
+
+### `ObjectTranslationType` Form Type
+
+If `symfony/form` is installed, you can use `ObjectTranslationType` to build an admin
+form for translating an object into a locale. It has a field for each translatable property,
+prefilled with any existing translation and showing the original value as help text. Passing
+the submitted data to `saveTranslationsFor()` creates, updates or deletes (for fields left
+empty) the translations:
+
+```php
+use SymfonyCasts\ObjectTranslationBundle\Form\ObjectTranslationType;
+
+public function translate(Product $product, string $locale, Request $request, TranslationManager $translationManager): Response
+{
+    $form = $this->createForm(ObjectTranslationType::class, options: [
+        'object' => $product,
+        'locale' => $locale,
+    ]);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $translationManager->saveTranslationsFor($product, $locale, $form->getData());
+
+        // redirect...
+    }
+
+    // render...
+}
+```
+
+Text columns render as a textarea, other columns as a text input.
 
 ## Translation Caching
 

@@ -32,7 +32,8 @@
         "zenstruck/foundry": "^2.8",
         "php-cs-fixer/shim": "^3.90",
         "phpstan/phpstan": "^2.1",
-        "twig/twig": "^3.22"
+        "twig/twig": "^3.22",
+        "symfony/form": "^6.4|^7.0|^8.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

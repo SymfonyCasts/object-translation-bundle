@@ -55,7 +55,7 @@ final class TranslationManager
     }
 
     /**
-     * @param array<string, string> $fields field => value
+     * @param array<string, ?string> $fields field => value, null deletes the translation
      */
     public function saveTranslationsFor(object $object, string $locale, array $fields): void
     {
@@ -68,6 +68,12 @@ final class TranslationManager
         }
 
         foreach ($fields as $field => $value) {
+            if (null === $value) {
+                $this->mappingManager->delete($type, $id, $locale, $field);
+
+                continue;
+            }
+
             $this->mappingManager->upsert($type, $id, $locale, $field, $value);
         }
 
