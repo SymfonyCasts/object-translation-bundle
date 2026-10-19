@@ -136,6 +136,7 @@ final class TranslationManager
         $id = $this->mappingManager->idFor($entity);
 
         $this->mappingManager->delete($type, $id, $locale, $field);
+        $this->mappingManager->flush();
         $this->cache->invalidateObject($type, $id, $locale);
     }
 }

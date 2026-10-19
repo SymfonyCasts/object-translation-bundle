@@ -45,6 +45,7 @@ class TranslatableMappingManagerTest extends KernelTestCase
         ]);
 
         $this->manager->delete('entity1', '1', 'fr', 'property1');
+        $this->manager->flush();
 
         $repo = repository(Translation::class);
         $this->assertCount(1, $repo->findAll());
@@ -77,6 +78,7 @@ class TranslatableMappingManagerTest extends KernelTestCase
         ]);
 
         $this->manager->delete('entity1', '1', 'fr');
+        $this->manager->flush();
 
         $repo = repository(Translation::class);
         $this->assertCount(1, $repo->findAll());

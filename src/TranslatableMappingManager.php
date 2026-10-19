@@ -2,7 +2,6 @@
 
 namespace SymfonyCasts\ObjectTranslationBundle;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Proxy;
 use SymfonyCasts\ObjectTranslationBundle\Mapping\Translatable;
@@ -141,32 +140,20 @@ final class TranslatableMappingManager
         $this->doctrine->getManagerForClass($this->translationClass)->flush();
     }
 
+    /**
+     * Only removes the translations, call flush() to write the removal.
+     */
     public function delete(string $type, string $id, ?string $locale = null, ?string $field = null): void
     {
         $om = $this->doctrine->getManagerForClass($this->translationClass);
+        $criteria = array_filter(
+            ['objectType' => $type, 'objectId' => $id, 'locale' => $locale, 'field' => $field],
+            static fn (?string $value) => null !== $value,
+        );
 
-        if (!$om instanceof EntityManagerInterface) {
-            throw new \LogicException(sprintf('Object manager for class "%s" must be an instance of EntityManagerInterface', $this->translationClass));
+        foreach ($om->getRepository($this->translationClass)->findBy($criteria) as $translation) {
+            $om->remove($translation);
         }
-
-        $qb = $om->createQueryBuilder()
-            ->delete($this->translationClass, 't')
-            ->where('t.objectType = :type')
-            ->andWhere('t.objectId = :id')
-            ->setParameter('type', $type)
-            ->setParameter('id', $id);
-
-        if ($locale) {
-            $qb->andWhere('t.locale = :locale')
-                ->setParameter('locale', $locale);
-        }
-
-        if ($field) {
-            $qb->andWhere('t.field = :field')
-                ->setParameter('field', $field);
-        }
-
-        $qb->getQuery()->execute();
     }
 
     /**
