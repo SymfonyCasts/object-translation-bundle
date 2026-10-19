@@ -12,6 +12,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\HttpKernel\Kernel;
 use SymfonyCasts\ObjectTranslationBundle\ObjectTranslationBundle;
 use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Translation;
+use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
 use Zenstruck\Foundry\ZenstruckFoundryBundle;
 
 class TestKernel extends Kernel
@@ -29,6 +30,9 @@ class TestKernel extends Kernel
     private function configureContainer(ContainerConfigurator $container, LoaderInterface $loader, ContainerBuilder $builder): void
     {
         $container->services()->set('logger', NullLogger::class);
+
+        // nothing uses the manager, so it would be removed from the container
+        $container->services()->alias('test.translation_manager', TranslationManager::class)->public();
 
         $builder->loadFromExtension('framework', [
             'test' => true,

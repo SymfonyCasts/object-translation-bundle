@@ -24,7 +24,7 @@ class TranslationManagerTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $this->manager = self::getContainer()->get(TranslationManager::class);
+        $this->manager = self::getContainer()->get('test.translation_manager');
     }
 
     public function testGetTranslatableTypes(): void

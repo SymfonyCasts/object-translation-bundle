@@ -23,10 +23,8 @@ return static function (ContainerConfigurator $container) {
             ->tag('twig.runtime')
 
         ->alias(ObjectTranslator::class, 'symfonycasts.object_translator')
-            ->public()
 
         ->set('symfonycasts.object_translation_manager', TranslationManager::class)
-            ->public()
             ->args([
                 service('.symfonycasts.object_translator.mapping_manager'),
                 service('doctrine'),
