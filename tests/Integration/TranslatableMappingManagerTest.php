@@ -13,7 +13,7 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 use function Zenstruck\Foundry\Persistence\persist;
 use function Zenstruck\Foundry\Persistence\repository;
 
-class TranslatableMappingManagerIntegrationTest extends KernelTestCase
+class TranslatableMappingManagerTest extends KernelTestCase
 {
     use Factories;
     use ResetDatabase;
