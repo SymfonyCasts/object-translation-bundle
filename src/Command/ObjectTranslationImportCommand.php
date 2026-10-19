@@ -48,9 +48,9 @@ final class ObjectTranslationImportCommand extends Command
 
         $io->progressStart();
 
-        fgetcsv($fp);
+        fgetcsv($fp, escape: '\\');
 
-        while (($row = fgetcsv($fp)) !== false) {
+        while (($row = fgetcsv($fp, escape: '\\')) !== false) {
             [$type, $id, $field, $value] = $row;
 
             $this->mappingManager->upsert($type, $id, $locale, $field, $value);

@@ -46,7 +46,7 @@ final class ObjectTranslationExportCommand extends Command
             'id',
             'field',
             'value',
-        ]);
+        ], escape: '\\');
 
         foreach ($io->progressIterate($this->mappingManager->allTranslatableObjects()) as $object) {
             $type = $this->mappingManager->translatableTypeFor($object);
@@ -58,7 +58,7 @@ final class ObjectTranslationExportCommand extends Command
                     $id,
                     $field,
                     $value,
-                ]);
+                ], escape: '\\');
             }
         }
 
