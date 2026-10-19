@@ -2,8 +2,6 @@
 
 namespace SymfonyCasts\ObjectTranslationBundle;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
 
@@ -11,7 +9,6 @@ final class TranslationManager
 {
     public function __construct(
         private TranslatableMappingManager $mappingManager,
-        private ManagerRegistry $doctrine,
         private TranslationCache $cache,
     ) {
     }
@@ -43,26 +40,6 @@ final class TranslationManager
     public function getTranslatableFields(string $class): array
     {
         return $this->mappingManager->getTranslatableFieldsForClass($class);
-    }
-
-    /**
-     * @param class-string $class
-     *
-     * @return iterable<object>
-     */
-    public function getObjectsForType(string $class): iterable
-    {
-        $manager = $this->doctrine->getManagerForClass($class);
-
-        if (!$manager instanceof EntityManagerInterface) {
-            throw new \LogicException(sprintf('Manager for class "%s" must be an instance of EntityManagerInterface.', $class));
-        }
-
-        return $manager->createQueryBuilder()
-            ->select('o')
-            ->from($class, 'o')
-            ->getQuery()
-            ->toIterable();
     }
 
     public function findTranslation(object $entity, string $locale, string $field): ?string

@@ -223,9 +223,6 @@ $types = $translationManager->getTranslatableTypes();
 
 // Get fields for a specific class
 $fields = $translationManager->getTranslatableFields(Product::class);
-
-// Get all objects of a given class (useful for lists in administration)
-$objects = $translationManager->getObjectsForType(Product::class);
 ```
 
 ## Translation Caching

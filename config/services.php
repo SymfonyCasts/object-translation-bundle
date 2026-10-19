@@ -27,7 +27,6 @@ return static function (ContainerConfigurator $container) {
         ->set('symfonycasts.object_translation_manager', TranslationManager::class)
             ->args([
                 service('.symfonycasts.object_translator.mapping_manager'),
-                service('doctrine'),
                 service('.symfonycasts.object_translator.cache'),
             ])
 
