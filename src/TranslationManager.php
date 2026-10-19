@@ -6,7 +6,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
 
-final class TranslationManager implements TranslationManagerInterface
+final class TranslationManager
 {
     public function __construct(
         private TranslatableMappingManager $mappingManager,
@@ -15,6 +15,7 @@ final class TranslationManager implements TranslationManagerInterface
     ) {
     }
 
+    /** @return list<TranslatableTypeInfo> */
     public function getTranslatableTypes(): array
     {
         $map = $this->mappingManager->getTranslatableTypeMap();
@@ -31,11 +32,21 @@ final class TranslationManager implements TranslationManagerInterface
         return $types;
     }
 
+    /**
+     * @param class-string $class
+     *
+     * @return list<string>
+     */
     public function getTranslatableFields(string $class): array
     {
         return $this->mappingManager->getTranslatableFieldsForClass($class);
     }
 
+    /**
+     * @param class-string $class
+     *
+     * @return iterable<object>
+     */
     public function getObjectsForType(string $class): iterable
     {
         $manager = $this->doctrine->getManagerForClass($class);
@@ -58,6 +69,7 @@ final class TranslationManager implements TranslationManagerInterface
         return $translations[$field] ?? null;
     }
 
+    /** @return array<string, string> field => translated value */
     public function findTranslations(object $entity, string $locale): array
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
@@ -71,6 +83,7 @@ final class TranslationManager implements TranslationManagerInterface
         $this->saveTranslations($entity, $locale, [$field => $value]);
     }
 
+    /** @param array<string, string> $fields field => value */
     public function saveTranslations(object $entity, string $locale, array $fields): void
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
@@ -83,6 +96,7 @@ final class TranslationManager implements TranslationManagerInterface
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
+    /** Deletes every field when $field is null. */
     public function deleteTranslation(object $entity, string $locale, ?string $field = null): void
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
@@ -92,6 +106,7 @@ final class TranslationManager implements TranslationManagerInterface
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
+    /** @param class-string $class */
     public function deleteTranslationsForType(string $class, ?string $locale = null): void
     {
         $map = $this->mappingManager->getTranslatableTypeMap();
@@ -140,6 +155,7 @@ final class TranslationManager implements TranslationManagerInterface
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
+    /** @param class-string $class */
     public function invalidateCacheForType(string $class): void
     {
         $map = $this->mappingManager->getTranslatableTypeMap();

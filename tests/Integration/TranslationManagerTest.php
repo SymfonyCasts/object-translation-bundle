@@ -8,7 +8,7 @@ use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
 use SymfonyCasts\ObjectTranslationBundle\ObjectTranslator;
 use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Entity1;
 use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Translation;
-use SymfonyCasts\ObjectTranslationBundle\TranslationManagerInterface;
+use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -20,11 +20,11 @@ class TranslationManagerTest extends KernelTestCase
     use Factories;
     use ResetDatabase;
 
-    private TranslationManagerInterface $manager;
+    private TranslationManager $manager;
 
     protected function setUp(): void
     {
-        $this->manager = self::getContainer()->get(TranslationManagerInterface::class);
+        $this->manager = self::getContainer()->get(TranslationManager::class);
     }
 
     public function testGetTranslatableTypes(): void

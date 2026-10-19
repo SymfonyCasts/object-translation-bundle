@@ -8,7 +8,6 @@ use SymfonyCasts\ObjectTranslationBundle\Command\ObjectTranslationWarmupCommand;
 use SymfonyCasts\ObjectTranslationBundle\ObjectTranslator;
 use SymfonyCasts\ObjectTranslationBundle\TranslationCache;
 use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
-use SymfonyCasts\ObjectTranslationBundle\TranslationManagerInterface;
 use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
 use SymfonyCasts\ObjectTranslationBundle\Twig\ObjectTranslatorExtension;
 
@@ -34,7 +33,7 @@ return static function (ContainerConfigurator $container) {
                 service('.symfonycasts.object_translator.cache'),
             ])
 
-        ->alias(TranslationManagerInterface::class, 'symfonycasts.object_translation_manager')
+        ->alias(TranslationManager::class, 'symfonycasts.object_translation_manager')
 
         ->set('.symfonycasts.object_translator.mapping_manager', TranslatableMappingManager::class)
             ->args([

@@ -175,18 +175,18 @@ of the translations in that file.
 
 ## Translation Management API
 
-If you want to build a custom administration interface for managing translations in your application (e.g. using Symfony UX, React or plain PHP), the bundle provides a stable `TranslationManagerInterface`. This interface allows you to access translations programmatically without needing to interact directly with the database or internal services.
+If you want to build a custom administration interface for managing translations in your application (e.g. using Symfony UX, React or plain PHP), the bundle provides a `TranslationManager` service. It allows you to access translations programmatically without needing to interact directly with the database or internal services.
 
 ### `TranslationManager` Service
 
-You can inject `TranslationManagerInterface` (an alias for `TranslationManager`) to perform CRUD operations, retrieve translation status, or invalidate the cache.
+You can inject `TranslationManager` to perform CRUD operations, retrieve translation status, or invalidate the cache.
 
 ```php
-use SymfonyCasts\ObjectTranslationBundle\TranslationManagerInterface;
+use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
 
 class TranslationAdminController
 {
-    public function edit(Product $product, TranslationManagerInterface $translationManager)
+    public function edit(Product $product, TranslationManager $translationManager)
     {
         // Save a translation for a specific field and locale
         $translationManager->saveTranslation($product, 'sk', 'name', 'Názov produktu');
