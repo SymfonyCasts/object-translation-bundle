@@ -4,13 +4,15 @@ namespace SymfonyCasts\ObjectTranslationBundle\Dto;
 
 final class TranslationStatus
 {
+    /**
+     * @param list<string> $translatedFields
+     * @param list<string> $missingFields
+     */
     public function __construct(
         public readonly string $type,
         public readonly string $id,
         public readonly string $locale,
-        /** @var list<string> */
         public readonly array $translatedFields,
-        /** @var list<string> */
         public readonly array $missingFields,
     ) {
     }

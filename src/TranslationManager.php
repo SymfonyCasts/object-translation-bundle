@@ -15,7 +15,9 @@ final class TranslationManager
     ) {
     }
 
-    /** @return list<TranslatableTypeInfo> */
+    /**
+     * @return list<TranslatableTypeInfo>
+     */
     public function getTranslatableTypes(): array
     {
         $map = $this->mappingManager->getTranslatableTypeMap();
@@ -69,7 +71,9 @@ final class TranslationManager
         return $translations[$field] ?? null;
     }
 
-    /** @return array<string, string> field => translated value */
+    /**
+     * @return array<string, string> field => translated value
+     */
     public function findTranslations(object $entity, string $locale): array
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
@@ -83,7 +87,9 @@ final class TranslationManager
         $this->saveTranslations($entity, $locale, [$field => $value]);
     }
 
-    /** @param array<string, string> $fields field => value */
+    /**
+     * @param array<string, string> $fields field => value
+     */
     public function saveTranslations(object $entity, string $locale, array $fields): void
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
@@ -96,7 +102,9 @@ final class TranslationManager
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
-    /** Deletes every field when $field is null. */
+    /**
+     * Deletes every field when $field is null.
+     */
     public function deleteTranslation(object $entity, string $locale, ?string $field = null): void
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
@@ -106,7 +114,9 @@ final class TranslationManager
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
-    /** @param class-string $class */
+    /**
+     * @param class-string $class
+     */
     public function deleteTranslationsForType(string $class, ?string $locale = null): void
     {
         $map = $this->mappingManager->getTranslatableTypeMap();
@@ -155,7 +165,9 @@ final class TranslationManager
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
-    /** @param class-string $class */
+    /**
+     * @param class-string $class
+     */
     public function invalidateCacheForType(string $class): void
     {
         $map = $this->mappingManager->getTranslatableTypeMap();
