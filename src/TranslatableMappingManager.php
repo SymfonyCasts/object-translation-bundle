@@ -23,12 +23,7 @@ final class TranslatableMappingManager
 
     public function translatableTypeFor(object $object): string
     {
-        $class = new \ReflectionClass($object);
-
-        if ($class->implementsInterface(Proxy::class)) {
-            $class = $class->getParentClass();
-        }
-
+        $class = self::reflectionFor($object);
         $type = ($class->getAttributes(Translatable::class)[0] ?? null)?->newInstance()->name ?? null;
 
         if (!$type) {
@@ -221,15 +216,28 @@ final class TranslatableMappingManager
 
     public function getTranslatableFieldsForClass(string $class): array
     {
-        $reflectionClass = new \ReflectionClass($class);
         $fields = [];
 
-        foreach ($reflectionClass->getProperties() as $property) {
+        foreach (self::reflectionFor($class)->getProperties() as $property) {
             if ($property->getAttributes(TranslatableProperty::class)) {
                 $fields[] = $property->getName();
             }
         }
 
         return $fields;
+    }
+
+    /**
+     * Doctrine proxies hide the entity's attributes and private properties.
+     */
+    private static function reflectionFor(object|string $objectOrClass): \ReflectionClass
+    {
+        $class = new \ReflectionClass($objectOrClass);
+
+        if ($class->implementsInterface(Proxy::class)) {
+            return $class->getParentClass();
+        }
+
+        return $class;
     }
 }
