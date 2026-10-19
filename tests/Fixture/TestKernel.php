@@ -3,6 +3,7 @@
 namespace SymfonyCasts\ObjectTranslationBundle\Tests\Fixture;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -27,6 +28,8 @@ class TestKernel extends Kernel
 
     private function configureContainer(ContainerConfigurator $container, LoaderInterface $loader, ContainerBuilder $builder): void
     {
+        $container->services()->set('logger', NullLogger::class);
+
         $builder->loadFromExtension('framework', [
             'test' => true,
         ]);
