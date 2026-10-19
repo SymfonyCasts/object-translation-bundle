@@ -239,11 +239,12 @@ symfonycasts_object_translation:
 
 ### Translation Tags
 
-If your cache pool supports *cache tagging*, tags are added to the cache keys. Two keys
+If your cache pool supports *cache tagging*, tags are added to the cache keys. Three tags
 are added:
 
 - `object-translation`: All translations are tagged with this key.
 - `object-translation-{type}`: Where `{type}` is the translatable alias (e.g., `product`).
+- `object-translation-{type}-{id}`: Where `{id}` is the object's identifier.
 
 You can invalidate these tags by using the `cache:pool:invalidate-tags` command:
 
@@ -253,7 +254,15 @@ symfony console cache:pool:invalidate-tags object-translation
 
 # invalidate only the translation cache for "product" entities
 symfony console cache:pool:invalidate-tags object-translation-product
+
+# invalidate only the translation cache for product 42
+symfony console cache:pool:invalidate-tags object-translation-product-42
 ```
+
+Translations saved or deleted with `TranslationManager` or the `object-translation:import`
+command are removed from the cache automatically, whether or not your pool supports tags.
+Without tags, `TranslationManager::invalidateCacheForEntity()` called without a locale
+clears the cache for each of your app's enabled locales.
 
 ### `object-translation:warmup` Command
 
