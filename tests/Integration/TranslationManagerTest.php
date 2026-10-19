@@ -61,7 +61,7 @@ class TranslationManagerTest extends KernelTestCase
         $this->assertSame(['property1'], $status->translatedFields);
         $this->assertEmpty($status->missingFields);
         $this->assertTrue($status->isFullyTranslated());
-        $this->assertEquals(1.0, $status->getCompletionPercentage());
+        $this->assertEquals(1.0, $status->getCompletionRatio());
 
         // Delete
         $this->manager->deleteTranslation($entity, 'de', 'property1');
