@@ -20,6 +20,8 @@ use SymfonyCasts\ObjectTranslationBundle\TranslationCache;
 )]
 final class ObjectTranslationImportCommand extends Command
 {
+    private const BATCH_SIZE = 100;
+
     public function __construct(
         private TranslatableMappingManager $mappingManager,
         private TranslationCache $cache,
@@ -50,15 +52,23 @@ final class ObjectTranslationImportCommand extends Command
 
         fgetcsv($fp, escape: '\\');
 
+        $pending = [];
+
         while (($row = fgetcsv($fp, escape: '\\')) !== false) {
             [$type, $id, $field, $value] = $row;
 
             $this->mappingManager->upsert($type, $id, $locale, $field, $value);
-            $this->mappingManager->flush();
-            $this->cache->invalidateObject($type, $id, $locale);
+            $pending[] = [$type, $id];
+
+            if (\count($pending) >= self::BATCH_SIZE) {
+                $this->flush($pending, $locale);
+                $pending = [];
+            }
 
             $io->progressAdvance();
         }
+
+        $this->flush($pending, $locale);
 
         fclose($fp);
 
@@ -67,5 +77,19 @@ final class ObjectTranslationImportCommand extends Command
         $io->success(sprintf('Imported "%s"', $file));
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Invalidates after flushing so a concurrent read can't cache the old values again.
+     *
+     * @param list<array{string, string}> $pending
+     */
+    private function flush(array $pending, string $locale): void
+    {
+        $this->mappingManager->flush();
+
+        foreach ($pending as [$type, $id]) {
+            $this->cache->invalidateObject($type, $id, $locale);
+        }
     }
 }
