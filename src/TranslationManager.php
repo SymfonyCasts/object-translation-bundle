@@ -71,11 +71,17 @@ final class TranslationManager
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
         $id = $this->mappingManager->idFor($entity);
+        $unknownFields = array_diff(array_keys($fields), $this->mappingManager->translatableFieldsFor($entity));
+
+        if ($unknownFields) {
+            throw new \InvalidArgumentException(sprintf('Fields "%s" of "%s" are not translatable.', implode('", "', $unknownFields), $type));
+        }
 
         foreach ($fields as $field => $value) {
             $this->mappingManager->upsert($type, $id, $locale, $field, $value);
         }
 
+        $this->mappingManager->flush();
         $this->cache->invalidateObject($type, $id, $locale);
     }
 

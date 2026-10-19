@@ -68,6 +68,16 @@ class TranslationManagerTest extends KernelTestCase
         $this->assertNull($this->manager->findTranslation($entity, 'de', 'property1'));
     }
 
+    public function testSaveTranslationsRejectsUnknownFields(): void
+    {
+        $entity = persist(Entity1::class, ['property1' => 'v1']);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Fields "nope" of "entity1" are not translatable.');
+
+        $this->manager->saveTranslations($entity, 'de', ['property1' => 'de_v1', 'nope' => 'x']);
+    }
+
     public function testInvalidateCache(): void
     {
         $entity = persist(Entity1::class, ['property1' => 'v1']);

@@ -136,6 +136,9 @@ final class TranslatableMappingManager
         }
     }
 
+    /**
+     * Only persists the translation, call flush() to write it.
+     */
     public function upsert(string $type, string $id, string $locale, string $field, string $value): void
     {
         $om = $this->doctrine->getManagerForClass($this->translationClass);
@@ -157,7 +160,11 @@ final class TranslatableMappingManager
         $translation->value = $value;
 
         $om->persist($translation);
-        $om->flush();
+    }
+
+    public function flush(): void
+    {
+        $this->doctrine->getManagerForClass($this->translationClass)->flush();
     }
 
     public function delete(string $type, string $id, string $locale, ?string $field = null): void

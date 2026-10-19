@@ -54,6 +54,7 @@ final class ObjectTranslationImportCommand extends Command
             [$type, $id, $field, $value] = $row;
 
             $this->mappingManager->upsert($type, $id, $locale, $field, $value);
+            $this->mappingManager->flush();
             $this->cache->invalidateObject($type, $id, $locale);
 
             $io->progressAdvance();
