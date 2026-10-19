@@ -56,7 +56,7 @@ class TranslationManagerTest extends KernelTestCase
         $this->assertSame(['property1' => 'de_v1'], $this->manager->findTranslations($entity, 'de'));
 
         // Status
-        $status = $this->manager->getTranslationStatus($entity, 'de');
+        $status = $this->manager->translationStatusFor($entity, 'de');
         $this->assertInstanceOf(TranslationStatus::class, $status);
         $this->assertSame(['property1'], $status->translatedFields);
         $this->assertEmpty($status->missingFields);

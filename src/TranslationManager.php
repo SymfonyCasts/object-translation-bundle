@@ -95,7 +95,7 @@ final class TranslationManager
         $this->delete($entity, $locale);
     }
 
-    public function getTranslationStatus(object $entity, string $locale): TranslationStatus
+    public function translationStatusFor(object $entity, string $locale): TranslationStatus
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
         $id = $this->mappingManager->idFor($entity);

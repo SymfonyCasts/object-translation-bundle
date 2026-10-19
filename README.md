@@ -205,7 +205,7 @@ class TranslationAdminController
         $translations = $translationManager->findTranslations($product, 'sk');
 
         // Get translation status (which fields are filled and which are missing)
-        $status = $translationManager->getTranslationStatus($product, 'sk');
+        $status = $translationManager->translationStatusFor($product, 'sk');
         $status->getCompletionRatio(); // e.g. 0.85
         $status->missingFields; // list of fields that are not yet translated
 
