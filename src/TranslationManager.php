@@ -32,13 +32,13 @@ final class TranslationManager
     }
 
     /**
-     * @param class-string $class
+     * @param object|class-string $objectOrClass
      *
      * @return list<string>
      */
-    public function getTranslatableFields(string $class): array
+    public function translatableFieldsFor(object|string $objectOrClass): array
     {
-        return $this->mappingManager->translatableFieldsFor($class);
+        return $this->mappingManager->translatableFieldsFor($objectOrClass);
     }
 
     public function findTranslation(object $entity, string $locale, string $field): ?string

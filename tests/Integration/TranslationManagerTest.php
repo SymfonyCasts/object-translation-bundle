@@ -38,10 +38,10 @@ class TranslationManagerTest extends KernelTestCase
         $this->assertSame(['property1'], $types[0]->fields);
     }
 
-    public function testGetTranslatableFields(): void
+    public function testTranslatableFieldsFor(): void
     {
-        $fields = $this->manager->getTranslatableFields(Entity1::class);
-        $this->assertSame(['property1'], $fields);
+        $this->assertSame(['property1'], $this->manager->translatableFieldsFor(Entity1::class));
+        $this->assertSame(['property1'], $this->manager->translatableFieldsFor(new Entity1()));
     }
 
     public function testCRUDTranslations(): void
