@@ -27,34 +27,13 @@ class TranslationCacheTest extends TestCase
         $this->assertSame(['new', 'new', 'old'], $this->cachedValues($cache));
     }
 
-    public function testInvalidateTypeFallsBackToIds(): void
-    {
-        $cache = $this->primedCache(new TranslationCache(new ArrayAdapter(), locales: ['de', 'fr']));
-
-        $cache->invalidateType('product', ['1', '2']);
-
-        $this->assertSame(['new', 'new', 'new'], $this->cachedValues($cache));
-    }
-
-    public function testInvalidateAllFallsBackToIdsByType(): void
-    {
-        $cache = $this->primedCache(new TranslationCache(new ArrayAdapter(), locales: ['de', 'fr']));
-
-        $cache->invalidateAll(['product' => ['1', '2']]);
-
-        $this->assertSame(['new', 'new', 'new'], $this->cachedValues($cache));
-    }
-
-    public function testTagsAreUsedWhenSupported(): void
+    public function testInvalidateObjectUsesTagsWhenSupported(): void
     {
         $cache = $this->primedCache(new TranslationCache(new TagAwareAdapter(new ArrayAdapter())));
 
-        $cache->invalidateType('product', (function () {
-            throw new \LogicException('IDs should not be loaded.');
-            yield;
-        })());
+        $cache->invalidateObject('product', '1');
 
-        $this->assertSame(['new', 'new', 'new'], $this->cachedValues($cache));
+        $this->assertSame(['new', 'new', 'old'], $this->cachedValues($cache));
     }
 
     private function primedCache(TranslationCache $cache): TranslationCache

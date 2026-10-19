@@ -2,7 +2,6 @@
 
 namespace SymfonyCasts\ObjectTranslationBundle;
 
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Proxy;
@@ -48,31 +47,6 @@ final class TranslatableMappingManager
         }
 
         return reset($id);
-    }
-
-    /**
-     * @param class-string $class
-     *
-     * @return iterable<string>
-     */
-    public function idsFor(string $class): iterable
-    {
-        $om = $this->doctrine->getManagerForClass($class);
-
-        if (!$om instanceof EntityManagerInterface) {
-            throw new \LogicException(sprintf('Object manager for class "%s" must be an instance of EntityManagerInterface', $class));
-        }
-
-        $idField = $om->getClassMetadata($class)->getSingleIdentifierFieldName();
-        $rows = $om->createQueryBuilder()
-            ->select("o.{$idField} AS id")
-            ->from($class, 'o')
-            ->getQuery()
-            ->toIterable([], AbstractQuery::HYDRATE_SCALAR);
-
-        foreach ($rows as $row) {
-            yield (string) $row['id'];
-        }
     }
 
     public function translationsFor(string $locale, string $type, string $id): array

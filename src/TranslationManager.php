@@ -130,31 +130,6 @@ final class TranslationManager
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
-    /**
-     * @param class-string $class
-     */
-    public function invalidateCacheForType(string $class): void
-    {
-        $type = $this->mappingManager->translatableTypeFor($class);
-
-        $this->cache->invalidateType($type, $this->mappingManager->idsFor($class));
-    }
-
-    public function invalidateAllTranslationCache(): void
-    {
-        $this->cache->invalidateAll($this->idsByType());
-    }
-
-    /**
-     * @return \Generator<string, iterable<string>>
-     */
-    private function idsByType(): \Generator
-    {
-        foreach ($this->mappingManager->translatableTypes() as $type => $class) {
-            yield $type => $this->mappingManager->idsFor($class);
-        }
-    }
-
     private function delete(object $entity, string $locale, ?string $field = null): void
     {
         $type = $this->mappingManager->translatableTypeFor($entity);

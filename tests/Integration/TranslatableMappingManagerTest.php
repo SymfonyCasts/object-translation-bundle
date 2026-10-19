@@ -4,7 +4,6 @@ namespace SymfonyCasts\ObjectTranslationBundle\Tests\Integration;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use SymfonyCasts\ObjectTranslationBundle\ObjectTranslator;
-use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Entity1;
 use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Translation;
 use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
 use Zenstruck\Foundry\Test\Factories;
@@ -82,16 +81,5 @@ class TranslatableMappingManagerTest extends KernelTestCase
         $repo = repository(Translation::class);
         $this->assertCount(1, $repo->findAll());
         $this->assertNotNull($repo->findOneBy(['locale' => 'en']));
-    }
-
-    public function testIdsFor(): void
-    {
-        $first = persist(Entity1::class, ['property1' => 'v1']);
-        $second = persist(Entity1::class, ['property1' => 'v2']);
-
-        $this->assertSame(
-            [(string) $first->id, (string) $second->id],
-            iterator_to_array($this->manager->idsFor(Entity1::class), false),
-        );
     }
 }

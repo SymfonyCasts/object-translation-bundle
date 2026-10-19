@@ -70,34 +70,6 @@ final class TranslationCache
         }
     }
 
-    /**
-     * @param iterable<string> $ids only iterated when the pool doesn't support tags
-     */
-    public function invalidateType(string $type, iterable $ids): void
-    {
-        if ($this->invalidateTag("object-translation-{$type}")) {
-            return;
-        }
-
-        foreach ($ids as $id) {
-            $this->invalidateObject($type, $id);
-        }
-    }
-
-    /**
-     * @param iterable<string, iterable<string>> $idsByType only iterated when the pool doesn't support tags
-     */
-    public function invalidateAll(iterable $idsByType): void
-    {
-        if ($this->invalidateTag('object-translation')) {
-            return;
-        }
-
-        foreach ($idsByType as $type => $ids) {
-            $this->invalidateType($type, $ids);
-        }
-    }
-
     private function invalidateTag(string $tag): bool
     {
         if (!$this->cache instanceof TagAwareCacheInterface) {
