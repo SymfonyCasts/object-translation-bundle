@@ -175,11 +175,15 @@ of the translations in that file.
 
 ## Translation Management API
 
-If you want to build a custom administration interface for managing translations in your application (e.g. using Symfony UX, React or plain PHP), the bundle provides a `TranslationManager` service. It allows you to access translations programmatically without needing to interact directly with the database or internal services.
+If you want to build a custom administration interface for managing translations in your
+application (e.g. using Symfony UX, React or plain PHP), the bundle provides a
+`TranslationManager` service. It allows you to access translations programmatically without
+needing to interact directly with the database or internal services.
 
 ### `TranslationManager` Service
 
-You can inject `TranslationManager` to perform CRUD operations, retrieve translation status, or invalidate the cache.
+You can inject `TranslationManager` to perform CRUD operations, retrieve translation status,
+or invalidate the cache.
 
 ```php
 use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
@@ -190,15 +194,15 @@ class TranslationAdminController
     {
         // Save a translation for a specific field and locale
         $translationManager->saveTranslation($product, 'sk', 'name', 'Názov produktu');
-        
+
         // Save multiple translations at once
         $translationManager->saveTranslations($product, 'sk', [
             'name' => 'Názov produktu',
             'description' => 'Dlhý popis produktu...',
         ]);
 
-        // Get all saved translations for a given entity and locale
-        $translations = $translationManager->findTranslations($product, 'sk'); // returns ['name' => '...', ...]
+        // Get all saved translations for a given entity and locale: ['name' => '...', ...]
+        $translations = $translationManager->findTranslations($product, 'sk');
 
         // Get translation status (which fields are filled and which are missing)
         $status = $translationManager->getTranslationStatus($product, 'sk');
@@ -214,8 +218,8 @@ class TranslationAdminController
 For automatic discovery of translatable entities, you can use:
 
 ```php
-// Get list of all classes marked with #[Translatable] attribute
-$types = $translationManager->getTranslatableTypes(); // returns list<TranslatableTypeInfo>
+// Get list of all classes marked with #[Translatable] attribute: list<TranslatableTypeInfo>
+$types = $translationManager->getTranslatableTypes();
 
 // Get fields for a specific class
 $fields = $translationManager->getTranslatableFields(Product::class);
