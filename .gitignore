@@ -1,3 +1,4 @@
+config/reference.php
 vendor/
 var/
 composer.lock
