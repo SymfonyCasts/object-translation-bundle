@@ -2,6 +2,7 @@
 
 namespace SymfonyCasts\ObjectTranslationBundle;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
 use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
@@ -53,7 +54,7 @@ final class TranslationManager
     {
         $manager = $this->doctrine->getManagerForClass($class);
 
-        if (!$manager instanceof \Doctrine\ORM\EntityManagerInterface) {
+        if (!$manager instanceof EntityManagerInterface) {
             throw new \LogicException(sprintf('Manager for class "%s" must be an instance of EntityManagerInterface.', $class));
         }
 
