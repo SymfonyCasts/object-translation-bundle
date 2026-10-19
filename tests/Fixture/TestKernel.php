@@ -36,11 +36,11 @@ class TestKernel extends Kernel
 
         $builder->loadFromExtension('framework', [
             'test' => true,
+            'enabled_locales' => ['en', 'de', 'fr'],
             'cache' => [
                 'pools' => [
                     'cache.object_translation' => [
                         'adapter' => 'cache.adapter.array',
-                        'tags' => true,
                     ],
                 ],
             ],
