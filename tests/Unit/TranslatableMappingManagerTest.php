@@ -24,26 +24,21 @@ class TranslatableMappingManagerTest extends TestCase
         );
     }
 
-    public function testGetTranslatableFieldsForClass(): void
+    public function testTranslatableFieldsFor(): void
     {
-        $fields = $this->manager->getTranslatableFieldsForClass(Entity1::class);
+        $fields = $this->manager->translatableFieldsFor(Entity1::class);
         $this->assertEquals(['property1'], $fields);
     }
 
     public function testUnwrapsProxies(): void
     {
         $this->assertSame('private_property', $this->manager->translatableTypeFor(new PrivatePropertyProxyStub()));
-        $this->assertSame(['name'], $this->manager->getTranslatableFieldsForClass(PrivatePropertyProxyStub::class));
+        $this->assertSame(['name'], $this->manager->translatableFieldsFor(PrivatePropertyProxyStub::class));
     }
 
-    public function testGetTranslatableTypeMap(): void
+    public function testTranslatableTypeForClass(): void
     {
-        $this->doctrine->method('getManagers')->willReturn([]);
-
-        // This test might be more complex because allTranslatableObjects() iterates over managers
-        // and metadata. Let's see if we can mock that easily or if it's better in Integration test.
-        $map = $this->manager->getTranslatableTypeMap();
-        $this->assertIsArray($map);
+        $this->assertSame('entity1', $this->manager->translatableTypeFor(Entity1::class));
     }
 }
 

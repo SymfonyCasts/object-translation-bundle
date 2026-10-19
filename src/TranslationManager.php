@@ -18,14 +18,13 @@ final class TranslationManager
      */
     public function getTranslatableTypes(): array
     {
-        $map = $this->mappingManager->getTranslatableTypeMap();
         $types = [];
 
-        foreach ($map as $name => $class) {
+        foreach ($this->mappingManager->translatableTypes() as $name => $class) {
             $types[] = new TranslatableTypeInfo(
                 $name,
                 $class,
-                $this->mappingManager->getTranslatableFieldsForClass($class)
+                $this->mappingManager->translatableFieldsFor($class)
             );
         }
 
@@ -39,7 +38,7 @@ final class TranslationManager
      */
     public function getTranslatableFields(string $class): array
     {
-        return $this->mappingManager->getTranslatableFieldsForClass($class);
+        return $this->mappingManager->translatableFieldsFor($class);
     }
 
     public function findTranslation(object $entity, string $locale, string $field): ?string
@@ -97,12 +96,7 @@ final class TranslationManager
      */
     public function deleteTranslationsForType(string $class, ?string $locale = null): void
     {
-        $map = $this->mappingManager->getTranslatableTypeMap();
-        $type = array_search($class, $map, true);
-
-        if (!$type) {
-            throw new \LogicException(sprintf('Class "%s" is not translatable.', $class));
-        }
+        $type = $this->mappingManager->translatableTypeFor($class);
 
         $this->mappingManager->deleteForType($type, $locale);
         $this->cache->invalidateType($type, $this->mappingManager->idsFor($class), $locale);
@@ -112,7 +106,7 @@ final class TranslationManager
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
         $id = $this->mappingManager->idFor($entity);
-        $allFields = $this->mappingManager->getTranslatableFieldsForClass($entity::class);
+        $allFields = $this->mappingManager->translatableFieldsFor($entity);
         $translations = $this->findTranslations($entity, $locale);
 
         $translatedFields = [];
@@ -148,12 +142,9 @@ final class TranslationManager
      */
     public function invalidateCacheForType(string $class): void
     {
-        $map = $this->mappingManager->getTranslatableTypeMap();
-        $type = array_search($class, $map, true);
+        $type = $this->mappingManager->translatableTypeFor($class);
 
-        if ($type) {
-            $this->cache->invalidateType($type, $this->mappingManager->idsFor($class));
-        }
+        $this->cache->invalidateType($type, $this->mappingManager->idsFor($class));
     }
 
     public function invalidateAllTranslationCache(): void
@@ -166,7 +157,7 @@ final class TranslationManager
      */
     private function idsByType(): \Generator
     {
-        foreach ($this->mappingManager->getTranslatableTypeMap() as $type => $class) {
+        foreach ($this->mappingManager->translatableTypes() as $type => $class) {
             yield $type => $this->mappingManager->idsFor($class);
         }
     }

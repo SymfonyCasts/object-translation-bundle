@@ -21,13 +21,13 @@ final class TranslatableMappingManager
     ) {
     }
 
-    public function translatableTypeFor(object $object): string
+    public function translatableTypeFor(object|string $objectOrClass): string
     {
-        $class = self::reflectionFor($object);
+        $class = self::reflectionFor($objectOrClass);
         $type = ($class->getAttributes(Translatable::class)[0] ?? null)?->newInstance()->name ?? null;
 
         if (!$type) {
-            throw new \LogicException(sprintf('Class "%s" is not translatable.', $object::class));
+            throw new \LogicException(sprintf('Class "%s" is not translatable.', $class->name));
         }
 
         return $type;
@@ -96,28 +96,42 @@ final class TranslatableMappingManager
 
     public function allTranslatableObjects(): iterable
     {
-        foreach ($this->doctrine->getManagers() as $om) {
-            foreach ($om->getMetadataFactory()->getAllMetadata() as $metadata) {
-                $class = $metadata->getName();
-
-                if (!(new \ReflectionClass($class))->getAttributes(Translatable::class)) {
-                    continue;
-                }
-
-                yield from $this->doctrine->getRepository($class)->findAll();
-            }
+        foreach ($this->translatableClasses() as $class) {
+            yield from $this->doctrine->getRepository($class)->findAll();
         }
+    }
+
+    /**
+     * @return array<string, class-string> type => class
+     */
+    public function translatableTypes(): array
+    {
+        $types = [];
+
+        foreach ($this->translatableClasses() as $class) {
+            $types[$this->translatableTypeFor($class)] = $class;
+        }
+
+        return $types;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function translatableFieldsFor(object|string $objectOrClass): array
+    {
+        $fields = [];
+
+        foreach (self::translatablePropertiesFor($objectOrClass) as $property) {
+            $fields[] = $property->getName();
+        }
+
+        return $fields;
     }
 
     public function translatableValuesFor(object $object): iterable
     {
-        $class = new \ReflectionClass($object);
-
-        foreach ($class->getProperties() as $property) {
-            if (!$property->getAttributes(TranslatableProperty::class)) {
-                continue;
-            }
-
+        foreach (self::translatablePropertiesFor($object) as $property) {
             yield $property->getName() => $property->getValue($object);
         }
     }
@@ -192,39 +206,30 @@ final class TranslatableMappingManager
         $qb->getQuery()->execute();
     }
 
-    public function getTranslatableTypeMap(): array
+    /**
+     * @return iterable<class-string>
+     */
+    private function translatableClasses(): iterable
     {
-        $map = [];
-
         foreach ($this->doctrine->getManagers() as $om) {
             foreach ($om->getMetadataFactory()->getAllMetadata() as $metadata) {
-                $class = $metadata->getName();
-                $reflectionClass = new \ReflectionClass($class);
-                $attribute = $reflectionClass->getAttributes(Translatable::class)[0] ?? null;
-
-                if (!$attribute) {
-                    continue;
+                if ($metadata->getReflectionClass()->getAttributes(Translatable::class)) {
+                    yield $metadata->getName();
                 }
-
-                $type = $attribute->newInstance()->name;
-                $map[$type] = $class;
             }
         }
-
-        return $map;
     }
 
-    public function getTranslatableFieldsForClass(string $class): array
+    /**
+     * @return iterable<\ReflectionProperty>
+     */
+    private static function translatablePropertiesFor(object|string $objectOrClass): iterable
     {
-        $fields = [];
-
-        foreach (self::reflectionFor($class)->getProperties() as $property) {
+        foreach (self::reflectionFor($objectOrClass)->getProperties() as $property) {
             if ($property->getAttributes(TranslatableProperty::class)) {
-                $fields[] = $property->getName();
+                yield $property;
             }
         }
-
-        return $fields;
     }
 
     /**
