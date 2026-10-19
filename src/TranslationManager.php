@@ -122,7 +122,7 @@ final class TranslationManager
         );
     }
 
-    public function invalidateCacheForEntity(object $entity, ?string $locale = null): void
+    public function invalidateCacheFor(object $entity, ?string $locale = null): void
     {
         $type = $this->mappingManager->translatableTypeFor($entity);
         $id = $this->mappingManager->idFor($entity);

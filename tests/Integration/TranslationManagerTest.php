@@ -117,7 +117,7 @@ class TranslationManagerTest extends KernelTestCase
         $this->assertSame('old_value', $translated->property1);
 
         // Invalidate
-        $this->manager->invalidateCacheForEntity($entity);
+        $this->manager->invalidateCacheFor($entity);
 
         // Now should be new value
         $translated = $translator->translate($entity, 'de');

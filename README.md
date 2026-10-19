@@ -210,7 +210,7 @@ class TranslationAdminController
         $status->missingFields; // list of fields that are not yet translated
 
         // Manually invalidate cache for this entity
-        $translationManager->invalidateCacheForEntity($product);
+        $translationManager->invalidateCacheFor($product);
     }
 }
 ```
@@ -261,7 +261,7 @@ symfony console cache:pool:invalidate-tags object-translation-product-42
 
 Translations saved or deleted with `TranslationManager` or the `object-translation:import`
 command are removed from the cache automatically, whether or not your pool supports tags.
-Without tags, `TranslationManager::invalidateCacheForEntity()` called without a locale
+Without tags, `TranslationManager::invalidateCacheFor()` called without a locale
 clears the cache for each of your app's enabled locales.
 
 ### `object-translation:warmup` Command
