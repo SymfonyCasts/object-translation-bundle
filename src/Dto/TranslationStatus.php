@@ -22,7 +22,7 @@ final class TranslationStatus
         return 0 === \count($this->missingFields);
     }
 
-    public function getCompletionRatio(): float
+    public function completionRatio(): float
     {
         $total = \count($this->translatedFields) + \count($this->missingFields);
 
