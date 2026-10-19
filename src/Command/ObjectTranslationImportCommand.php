@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
+use SymfonyCasts\ObjectTranslationBundle\TranslationCache;
 
 /**
  * @internal
@@ -19,8 +20,11 @@ use SymfonyCasts\ObjectTranslationBundle\TranslatableMappingManager;
 )]
 final class ObjectTranslationImportCommand extends Command
 {
+    private const BATCH_SIZE = 100;
+
     public function __construct(
         private TranslatableMappingManager $mappingManager,
+        private TranslationCache $cache,
     ) {
         parent::__construct();
     }
@@ -46,15 +50,25 @@ final class ObjectTranslationImportCommand extends Command
 
         $io->progressStart();
 
-        fgetcsv($fp);
+        fgetcsv($fp, escape: '\\');
 
-        while (($row = fgetcsv($fp)) !== false) {
+        $pending = [];
+
+        while (($row = fgetcsv($fp, escape: '\\')) !== false) {
             [$type, $id, $field, $value] = $row;
 
             $this->mappingManager->upsert($type, $id, $locale, $field, $value);
+            $pending[] = [$type, $id];
+
+            if (\count($pending) >= self::BATCH_SIZE) {
+                $this->flush($pending, $locale);
+                $pending = [];
+            }
 
             $io->progressAdvance();
         }
+
+        $this->flush($pending, $locale);
 
         fclose($fp);
 
@@ -63,5 +77,19 @@ final class ObjectTranslationImportCommand extends Command
         $io->success(sprintf('Imported "%s"', $file));
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Invalidates after flushing so a concurrent read can't cache the old values again.
+     *
+     * @param list<array{string, string}> $pending
+     */
+    private function flush(array $pending, string $locale): void
+    {
+        $this->mappingManager->flush();
+
+        foreach ($pending as [$type, $id]) {
+            $this->cache->invalidateObject($type, $id, $locale);
+        }
     }
 }

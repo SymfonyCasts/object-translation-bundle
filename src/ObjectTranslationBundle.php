@@ -59,11 +59,10 @@ final class ObjectTranslationBundle extends AbstractBundle
     {
         $container->import('../config/services.php');
 
-        $objectTranslatorDef = $builder->getDefinition('symfonycasts.object_translator');
-
         if ($config['cache']['enabled']) {
-            $objectTranslatorDef->setArgument(3, new Reference($config['cache']['pool']));
-            $objectTranslatorDef->setArgument(4, $config['cache']['ttl']);
+            $builder->getDefinition('.symfonycasts.object_translator.cache')
+                ->setArgument(0, new Reference($config['cache']['pool']))
+                ->setArgument(1, $config['cache']['ttl']);
         }
 
         $builder->getDefinition('.symfonycasts.object_translator.mapping_manager')

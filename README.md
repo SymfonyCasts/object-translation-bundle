@@ -173,6 +173,58 @@ symfony console object-translation:import translations_fr.csv fr
 The first argument is the path to the CSV file, and the second argument is the locale
 of the translations in that file.
 
+## Translation Management API
+
+If you want to build a custom administration interface for managing translations in your
+application (e.g. using Symfony UX, React or plain PHP), the bundle provides a
+`TranslationManager` service. It allows you to access translations programmatically without
+needing to interact directly with the database or internal services.
+
+### `TranslationManager` Service
+
+You can inject `TranslationManager` to perform CRUD operations, retrieve translation status,
+or invalidate the cache.
+
+```php
+use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
+
+class TranslationAdminController
+{
+    public function edit(Product $product, TranslationManager $translationManager)
+    {
+        // Save a translation for a specific field and locale
+        $translationManager->saveTranslation($product, 'sk', 'name', 'Názov produktu');
+
+        // Save multiple translations at once
+        $translationManager->saveTranslationsFor($product, 'sk', [
+            'name' => 'Názov produktu',
+            'description' => 'Dlhý popis produktu...',
+        ]);
+
+        // Get all saved translations for a given entity and locale: ['name' => '...', ...]
+        $translations = $translationManager->findTranslationsFor($product, 'sk');
+
+        // Get translation status (which fields are filled and which are missing)
+        $status = $translationManager->translationStatusFor($product, 'sk');
+        $status->completionRatio(); // e.g. 0.85
+        $status->missingFields; // list of fields that are not yet translated
+
+        // Manually invalidate cache for this entity
+        $translationManager->invalidateCacheFor($product);
+    }
+}
+```
+
+For automatic discovery of translatable entities, you can use:
+
+```php
+// Get list of all classes marked with #[Translatable] attribute: list<TranslatableTypeInfo>
+$types = $translationManager->translatableTypes();
+
+// Get fields for a specific class or object
+$fields = $translationManager->translatableFieldsFor(Product::class);
+```
+
 ## Translation Caching
 
 For performance, translations are cached. By default, they use your `cache.app` pool
@@ -187,11 +239,12 @@ symfonycasts_object_translation:
 
 ### Translation Tags
 
-If your cache pool supports *cache tagging*, tags are added to the cache keys. Two keys
+If your cache pool supports *cache tagging*, tags are added to the cache keys. Three tags
 are added:
 
 - `object-translation`: All translations are tagged with this key.
 - `object-translation-{type}`: Where `{type}` is the translatable alias (e.g., `product`).
+- `object-translation-{type}-{id}`: Where `{id}` is the object's identifier.
 
 You can invalidate these tags by using the `cache:pool:invalidate-tags` command:
 
@@ -201,7 +254,15 @@ symfony console cache:pool:invalidate-tags object-translation
 
 # invalidate only the translation cache for "product" entities
 symfony console cache:pool:invalidate-tags object-translation-product
+
+# invalidate only the translation cache for product 42
+symfony console cache:pool:invalidate-tags object-translation-product-42
 ```
+
+Translations saved or deleted with `TranslationManager` or the `object-translation:import`
+command are removed from the cache automatically, whether or not your pool supports tags.
+Without tags, `TranslationManager::invalidateCacheFor()` called without a locale
+clears the cache for each of your app's enabled locales.
 
 ### `object-translation:warmup` Command
 

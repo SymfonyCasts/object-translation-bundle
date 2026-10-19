@@ -46,19 +46,18 @@ final class ObjectTranslationExportCommand extends Command
             'id',
             'field',
             'value',
-        ]);
+        ], escape: '\\');
 
-        foreach ($io->progressIterate($this->mappingManager->allTranslatableObjects()) as $object) {
-            $type = $this->mappingManager->translatableTypeFor($object);
+        foreach ($io->progressIterate($this->mappingManager->allTranslatableObjects()) as $type => $object) {
             $id = $this->mappingManager->idFor($object);
 
             foreach ($this->mappingManager->translatableValuesFor($object) as $field => $value) {
                 fputcsv($fp, [
-                    $type,
+                    $type->name,
                     $id,
                     $field,
                     $value,
-                ]);
+                ], escape: '\\');
             }
         }
 

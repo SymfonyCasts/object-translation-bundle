@@ -1,0 +1,145 @@
+<?php
+
+namespace SymfonyCasts\ObjectTranslationBundle\Tests\Integration;
+
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
+use SymfonyCasts\ObjectTranslationBundle\Dto\TranslationStatus;
+use SymfonyCasts\ObjectTranslationBundle\ObjectTranslator;
+use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Entity1;
+use SymfonyCasts\ObjectTranslationBundle\Tests\Fixture\Entity\Translation;
+use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
+use Zenstruck\Foundry\Test\Factories;
+use Zenstruck\Foundry\Test\ResetDatabase;
+
+use function Zenstruck\Foundry\Persistence\persist;
+use function Zenstruck\Foundry\Persistence\repository;
+
+class TranslationManagerTest extends KernelTestCase
+{
+    use Factories;
+    use ResetDatabase;
+
+    private TranslationManager $manager;
+
+    protected function setUp(): void
+    {
+        $this->manager = self::getContainer()->get('test.translation_manager');
+    }
+
+    public function testTranslatableTypes(): void
+    {
+        $types = $this->manager->translatableTypes();
+
+        $this->assertCount(1, $types);
+        $this->assertInstanceOf(TranslatableTypeInfo::class, $types[0]);
+        $this->assertSame('entity1', $types[0]->name);
+        $this->assertSame(Entity1::class, $types[0]->class);
+        $this->assertSame(['property1'], $types[0]->fields);
+    }
+
+    public function testTranslatableFieldsFor(): void
+    {
+        $this->assertSame(['property1'], $this->manager->translatableFieldsFor(Entity1::class));
+        $this->assertSame(['property1'], $this->manager->translatableFieldsFor(new Entity1()));
+    }
+
+    public function testCRUDTranslations(): void
+    {
+        $entity = persist(Entity1::class, ['property1' => 'v1']);
+
+        // Save
+        $this->manager->saveTranslation($entity, 'de', 'property1', 'de_v1');
+
+        // Find
+        $this->assertSame('de_v1', $this->manager->findTranslation($entity, 'de', 'property1'));
+        $this->assertSame(['property1' => 'de_v1'], $this->manager->findTranslationsFor($entity, 'de'));
+
+        // Status
+        $status = $this->manager->translationStatusFor($entity, 'de');
+        $this->assertInstanceOf(TranslationStatus::class, $status);
+        $this->assertSame(['property1'], $status->translatedFields);
+        $this->assertEmpty($status->missingFields);
+        $this->assertTrue($status->isFullyTranslated());
+        $this->assertEquals(1.0, $status->completionRatio());
+
+        // Delete
+        $this->manager->deleteTranslation($entity, 'de', 'property1');
+        $this->assertNull($this->manager->findTranslation($entity, 'de', 'property1'));
+    }
+
+    public function testDeleteTranslationsForLocale(): void
+    {
+        $entity = persist(Entity1::class, ['property1' => 'v1']);
+        $this->manager->saveTranslation($entity, 'de', 'property1', 'de_v1');
+        $this->manager->saveTranslation($entity, 'fr', 'property1', 'fr_v1');
+
+        $this->manager->deleteTranslationsFor($entity, 'de');
+
+        $this->assertSame([], $this->manager->findTranslationsFor($entity, 'de'));
+        $this->assertSame(['property1' => 'fr_v1'], $this->manager->findTranslationsFor($entity, 'fr'));
+    }
+
+    public function testDeleteTranslationsForAllLocales(): void
+    {
+        $entity = persist(Entity1::class, ['property1' => 'v1']);
+        $other = persist(Entity1::class, ['property1' => 'v2']);
+        $this->manager->saveTranslation($entity, 'de', 'property1', 'de_v1');
+        $this->manager->saveTranslation($entity, 'fr', 'property1', 'fr_v1');
+        $this->manager->saveTranslation($other, 'de', 'property1', 'de_v2');
+
+        $translator = self::getContainer()->get(ObjectTranslator::class);
+        $this->assertSame('fr_v1', $translator->translate($entity, 'fr')->property1);
+
+        $this->manager->deleteTranslationsFor($entity);
+
+        $this->assertSame([], $this->manager->findTranslationsFor($entity, 'de'));
+        $this->assertSame([], $this->manager->findTranslationsFor($entity, 'fr'));
+        $this->assertSame(['property1' => 'de_v2'], $this->manager->findTranslationsFor($other, 'de'));
+        $this->assertSame('v1', $translator->translate($entity, 'fr')->property1);
+    }
+
+    public function testSaveTranslationsRejectsUnknownFields(): void
+    {
+        $entity = persist(Entity1::class, ['property1' => 'v1']);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Fields "nope" of "entity1" are not translatable.');
+
+        $this->manager->saveTranslationsFor($entity, 'de', ['property1' => 'de_v1', 'nope' => 'x']);
+    }
+
+    public function testInvalidateCache(): void
+    {
+        $entity = persist(Entity1::class, ['property1' => 'v1']);
+        persist(Translation::class, [
+            'objectType' => 'entity1',
+            'objectId' => $entity->id,
+            'locale' => 'de',
+            'field' => 'property1',
+            'value' => 'old_value',
+        ]);
+
+        $translator = self::getContainer()->get(ObjectTranslator::class);
+
+        // Prime cache
+        $translated = $translator->translate($entity, 'de');
+        $this->assertSame('old_value', $translated->property1);
+
+        // Update translation directly in DB to bypass manager auto-invalidation
+        $t = repository(Translation::class)->findOneBy(['locale' => 'de']);
+        $t->value = 'new_value';
+        self::getContainer()->get('doctrine')->getManager()->flush();
+
+        // Still old value due to cache
+        $translated = $translator->translate($entity, 'de');
+        $this->assertSame('old_value', $translated->property1);
+
+        // Invalidate
+        $this->manager->invalidateCacheFor($entity);
+
+        // Now should be new value
+        $translated = $translator->translate($entity, 'de');
+        $this->assertSame('new_value', $translated->property1);
+    }
+}

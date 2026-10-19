@@ -4,6 +4,7 @@ namespace SymfonyCasts\ObjectTranslationBundle;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Proxy;
+use SymfonyCasts\ObjectTranslationBundle\Dto\TranslatableTypeInfo;
 use SymfonyCasts\ObjectTranslationBundle\Mapping\Translatable;
 use SymfonyCasts\ObjectTranslationBundle\Mapping\TranslatableProperty;
 use SymfonyCasts\ObjectTranslationBundle\Model\Translation;
@@ -19,18 +20,13 @@ final class TranslatableMappingManager
     ) {
     }
 
-    public function translatableTypeFor(object $object): string
+    public function translatableTypeFor(object|string $objectOrClass): string
     {
-        $class = new \ReflectionClass($object);
-
-        if ($class->implementsInterface(Proxy::class)) {
-            $class = $class->getParentClass();
-        }
-
+        $class = self::reflectionFor($objectOrClass);
         $type = ($class->getAttributes(Translatable::class)[0] ?? null)?->newInstance()->name ?? null;
 
         if (!$type) {
-            throw new \LogicException(sprintf('Class "%s" is not translatable.', $object::class));
+            throw new \LogicException(sprintf('Class "%s" is not translatable.', $class->name));
         }
 
         return $type;
@@ -72,34 +68,60 @@ final class TranslatableMappingManager
         return $translationValues;
     }
 
+    /**
+     * @return iterable<TranslatableTypeInfo, object>
+     */
     public function allTranslatableObjects(): iterable
     {
-        foreach ($this->doctrine->getManagers() as $om) {
-            foreach ($om->getMetadataFactory()->getAllMetadata() as $metadata) {
-                $class = $metadata->getName();
-
-                if (!(new \ReflectionClass($class))->getAttributes(Translatable::class)) {
-                    continue;
-                }
-
-                yield from $this->doctrine->getRepository($class)->findAll();
+        foreach ($this->translatableTypes() as $type) {
+            foreach ($this->doctrine->getRepository($type->class)->findAll() as $object) {
+                yield $type => $object;
             }
         }
+    }
+
+    /**
+     * @return list<TranslatableTypeInfo>
+     */
+    public function translatableTypes(): array
+    {
+        $types = [];
+
+        foreach ($this->translatableClasses() as $class) {
+            $types[] = new TranslatableTypeInfo(
+                $this->translatableTypeFor($class),
+                $class,
+                $this->translatableFieldsFor($class),
+            );
+        }
+
+        return $types;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function translatableFieldsFor(object|string $objectOrClass): array
+    {
+        $fields = [];
+
+        foreach (self::translatablePropertiesFor($objectOrClass) as $property) {
+            $fields[] = $property->getName();
+        }
+
+        return $fields;
     }
 
     public function translatableValuesFor(object $object): iterable
     {
-        $class = new \ReflectionClass($object);
-
-        foreach ($class->getProperties() as $property) {
-            if (!$property->getAttributes(TranslatableProperty::class)) {
-                continue;
-            }
-
+        foreach (self::translatablePropertiesFor($object) as $property) {
             yield $property->getName() => $property->getValue($object);
         }
     }
 
+    /**
+     * Only persists the translation, call flush() to write it.
+     */
     public function upsert(string $type, string $id, string $locale, string $field, string $value): void
     {
         $om = $this->doctrine->getManagerForClass($this->translationClass);
@@ -121,6 +143,66 @@ final class TranslatableMappingManager
         $translation->value = $value;
 
         $om->persist($translation);
-        $om->flush();
+    }
+
+    public function flush(): void
+    {
+        $this->doctrine->getManagerForClass($this->translationClass)->flush();
+    }
+
+    /**
+     * Only removes the translations, call flush() to write the removal.
+     */
+    public function delete(string $type, string $id, ?string $locale = null, ?string $field = null): void
+    {
+        $om = $this->doctrine->getManagerForClass($this->translationClass);
+        $criteria = array_filter(
+            ['objectType' => $type, 'objectId' => $id, 'locale' => $locale, 'field' => $field],
+            static fn (?string $value) => null !== $value,
+        );
+
+        foreach ($om->getRepository($this->translationClass)->findBy($criteria) as $translation) {
+            $om->remove($translation);
+        }
+    }
+
+    /**
+     * @return iterable<class-string>
+     */
+    private function translatableClasses(): iterable
+    {
+        foreach ($this->doctrine->getManagers() as $om) {
+            foreach ($om->getMetadataFactory()->getAllMetadata() as $metadata) {
+                if ($metadata->getReflectionClass()->getAttributes(Translatable::class)) {
+                    yield $metadata->getName();
+                }
+            }
+        }
+    }
+
+    /**
+     * @return iterable<\ReflectionProperty>
+     */
+    private static function translatablePropertiesFor(object|string $objectOrClass): iterable
+    {
+        foreach (self::reflectionFor($objectOrClass)->getProperties() as $property) {
+            if ($property->getAttributes(TranslatableProperty::class)) {
+                yield $property;
+            }
+        }
+    }
+
+    /**
+     * Doctrine proxies hide the real class's attributes and private properties.
+     */
+    private static function reflectionFor(object|string $objectOrClass): \ReflectionClass
+    {
+        $class = new \ReflectionClass($objectOrClass);
+
+        if ($class->implementsInterface(Proxy::class)) {
+            return $class->getParentClass();
+        }
+
+        return $class;
     }
 }
