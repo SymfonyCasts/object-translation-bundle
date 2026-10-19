@@ -31,9 +31,9 @@ class TranslationCacheTest extends TestCase
     {
         $cache = $this->primedCache(new TranslationCache(new ArrayAdapter(), locales: ['de', 'fr']));
 
-        $cache->invalidateType('product', ['1', '2'], 'fr');
+        $cache->invalidateType('product', ['1', '2']);
 
-        $this->assertSame(['old', 'new', 'new'], $this->cachedValues($cache));
+        $this->assertSame(['new', 'new', 'new'], $this->cachedValues($cache));
     }
 
     public function testInvalidateAllFallsBackToIdsByType(): void

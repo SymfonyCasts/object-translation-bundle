@@ -192,27 +192,6 @@ final class TranslatableMappingManager
         $qb->getQuery()->execute();
     }
 
-    public function deleteForType(string $type, ?string $locale = null): void
-    {
-        $om = $this->doctrine->getManagerForClass($this->translationClass);
-
-        if (!$om instanceof EntityManagerInterface) {
-            throw new \LogicException(sprintf('Object manager for class "%s" must be an instance of EntityManagerInterface', $this->translationClass));
-        }
-
-        $qb = $om->createQueryBuilder()
-            ->delete($this->translationClass, 't')
-            ->where('t.objectType = :type')
-            ->setParameter('type', $type);
-
-        if ($locale) {
-            $qb->andWhere('t.locale = :locale')
-                ->setParameter('locale', $locale);
-        }
-
-        $qb->getQuery()->execute();
-    }
-
     /**
      * @return iterable<class-string>
      */

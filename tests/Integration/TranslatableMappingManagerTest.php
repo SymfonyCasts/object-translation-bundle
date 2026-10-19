@@ -84,31 +84,6 @@ class TranslatableMappingManagerTest extends KernelTestCase
         $this->assertNotNull($repo->findOneBy(['locale' => 'en']));
     }
 
-    public function testDeleteForType(): void
-    {
-        persist(Translation::class, ['objectType' => 'entity1', 'objectId' => '1', 'locale' => 'fr', 'field' => 'f', 'value' => 'v']);
-        persist(Translation::class, ['objectType' => 'entity1', 'objectId' => '2', 'locale' => 'fr', 'field' => 'f', 'value' => 'v']);
-        persist(Translation::class, ['objectType' => 'other', 'objectId' => '1', 'locale' => 'fr', 'field' => 'f', 'value' => 'v']);
-
-        $this->manager->deleteForType('entity1');
-
-        $repo = repository(Translation::class);
-        $this->assertCount(1, $repo->findAll());
-        $this->assertNotNull($repo->findOneBy(['objectType' => 'other']));
-    }
-
-    public function testDeleteForTypeAndLocale(): void
-    {
-        persist(Translation::class, ['objectType' => 'entity1', 'objectId' => '1', 'locale' => 'fr', 'field' => 'f', 'value' => 'v']);
-        persist(Translation::class, ['objectType' => 'entity1', 'objectId' => '1', 'locale' => 'en', 'field' => 'f', 'value' => 'v']);
-
-        $this->manager->deleteForType('entity1', 'fr');
-
-        $repo = repository(Translation::class);
-        $this->assertCount(1, $repo->findAll());
-        $this->assertNotNull($repo->findOneBy(['locale' => 'en']));
-    }
-
     public function testIdsFor(): void
     {
         $first = persist(Entity1::class, ['property1' => 'v1']);

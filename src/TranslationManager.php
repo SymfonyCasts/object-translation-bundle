@@ -95,17 +95,6 @@ final class TranslationManager
         $this->delete($entity, $locale);
     }
 
-    /**
-     * @param class-string $class
-     */
-    public function deleteTranslationsForType(string $class, ?string $locale = null): void
-    {
-        $type = $this->mappingManager->translatableTypeFor($class);
-
-        $this->mappingManager->deleteForType($type, $locale);
-        $this->cache->invalidateType($type, $this->mappingManager->idsFor($class), $locale);
-    }
-
     public function getTranslationStatus(object $entity, string $locale): TranslationStatus
     {
         $type = $this->mappingManager->translatableTypeFor($entity);

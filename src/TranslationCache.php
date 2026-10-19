@@ -73,14 +73,14 @@ final class TranslationCache
     /**
      * @param iterable<string> $ids only iterated when the pool doesn't support tags
      */
-    public function invalidateType(string $type, iterable $ids, ?string $locale = null): void
+    public function invalidateType(string $type, iterable $ids): void
     {
         if ($this->invalidateTag("object-translation-{$type}")) {
             return;
         }
 
         foreach ($ids as $id) {
-            $this->invalidateObject($type, $id, $locale);
+            $this->invalidateObject($type, $id);
         }
     }
 
