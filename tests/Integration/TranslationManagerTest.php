@@ -53,7 +53,7 @@ class TranslationManagerTest extends KernelTestCase
 
         // Find
         $this->assertSame('de_v1', $this->manager->findTranslation($entity, 'de', 'property1'));
-        $this->assertSame(['property1' => 'de_v1'], $this->manager->findTranslations($entity, 'de'));
+        $this->assertSame(['property1' => 'de_v1'], $this->manager->findTranslationsFor($entity, 'de'));
 
         // Status
         $status = $this->manager->translationStatusFor($entity, 'de');
@@ -76,8 +76,8 @@ class TranslationManagerTest extends KernelTestCase
 
         $this->manager->deleteTranslationsFor($entity, 'de');
 
-        $this->assertSame([], $this->manager->findTranslations($entity, 'de'));
-        $this->assertSame(['property1' => 'fr_v1'], $this->manager->findTranslations($entity, 'fr'));
+        $this->assertSame([], $this->manager->findTranslationsFor($entity, 'de'));
+        $this->assertSame(['property1' => 'fr_v1'], $this->manager->findTranslationsFor($entity, 'fr'));
     }
 
     public function testDeleteTranslationsForAllLocales(): void
@@ -93,9 +93,9 @@ class TranslationManagerTest extends KernelTestCase
 
         $this->manager->deleteTranslationsFor($entity);
 
-        $this->assertSame([], $this->manager->findTranslations($entity, 'de'));
-        $this->assertSame([], $this->manager->findTranslations($entity, 'fr'));
-        $this->assertSame(['property1' => 'de_v2'], $this->manager->findTranslations($other, 'de'));
+        $this->assertSame([], $this->manager->findTranslationsFor($entity, 'de'));
+        $this->assertSame([], $this->manager->findTranslationsFor($entity, 'fr'));
+        $this->assertSame(['property1' => 'de_v2'], $this->manager->findTranslationsFor($other, 'de'));
         $this->assertSame('v1', $translator->translate($entity, 'fr')->property1);
     }
 
@@ -106,7 +106,7 @@ class TranslationManagerTest extends KernelTestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Fields "nope" of "entity1" are not translatable.');
 
-        $this->manager->saveTranslations($entity, 'de', ['property1' => 'de_v1', 'nope' => 'x']);
+        $this->manager->saveTranslationsFor($entity, 'de', ['property1' => 'de_v1', 'nope' => 'x']);
     }
 
     public function testInvalidateCache(): void

@@ -196,13 +196,13 @@ class TranslationAdminController
         $translationManager->saveTranslation($product, 'sk', 'name', 'Názov produktu');
 
         // Save multiple translations at once
-        $translationManager->saveTranslations($product, 'sk', [
+        $translationManager->saveTranslationsFor($product, 'sk', [
             'name' => 'Názov produktu',
             'description' => 'Dlhý popis produktu...',
         ]);
 
         // Get all saved translations for a given entity and locale: ['name' => '...', ...]
-        $translations = $translationManager->findTranslations($product, 'sk');
+        $translations = $translationManager->findTranslationsFor($product, 'sk');
 
         // Get translation status (which fields are filled and which are missing)
         $status = $translationManager->translationStatusFor($product, 'sk');

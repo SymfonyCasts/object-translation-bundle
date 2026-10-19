@@ -33,7 +33,7 @@ final class TranslationManager
 
     public function findTranslation(object $object, string $locale, string $field): ?string
     {
-        $translations = $this->findTranslations($object, $locale);
+        $translations = $this->findTranslationsFor($object, $locale);
 
         return $translations[$field] ?? null;
     }
@@ -41,7 +41,7 @@ final class TranslationManager
     /**
      * @return array<string, string> field => translated value
      */
-    public function findTranslations(object $object, string $locale): array
+    public function findTranslationsFor(object $object, string $locale): array
     {
         $type = $this->mappingManager->translatableTypeFor($object);
         $id = $this->mappingManager->idFor($object);
@@ -51,13 +51,13 @@ final class TranslationManager
 
     public function saveTranslation(object $object, string $locale, string $field, string $value): void
     {
-        $this->saveTranslations($object, $locale, [$field => $value]);
+        $this->saveTranslationsFor($object, $locale, [$field => $value]);
     }
 
     /**
      * @param array<string, string> $fields field => value
      */
-    public function saveTranslations(object $object, string $locale, array $fields): void
+    public function saveTranslationsFor(object $object, string $locale, array $fields): void
     {
         $type = $this->mappingManager->translatableTypeFor($object);
         $id = $this->mappingManager->idFor($object);
@@ -90,7 +90,7 @@ final class TranslationManager
         $type = $this->mappingManager->translatableTypeFor($object);
         $id = $this->mappingManager->idFor($object);
         $allFields = $this->mappingManager->translatableFieldsFor($object);
-        $translations = $this->findTranslations($object, $locale);
+        $translations = $this->findTranslationsFor($object, $locale);
 
         $translatedFields = [];
         $missingFields = [];
