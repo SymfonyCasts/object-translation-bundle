@@ -16,7 +16,7 @@ final class TranslationManager
     /**
      * @return list<TranslatableTypeInfo>
      */
-    public function getTranslatableTypes(): array
+    public function translatableTypes(): array
     {
         $types = [];
 

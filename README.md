@@ -219,7 +219,7 @@ For automatic discovery of translatable entities, you can use:
 
 ```php
 // Get list of all classes marked with #[Translatable] attribute: list<TranslatableTypeInfo>
-$types = $translationManager->getTranslatableTypes();
+$types = $translationManager->translatableTypes();
 
 // Get fields for a specific class
 $fields = $translationManager->getTranslatableFields(Product::class);

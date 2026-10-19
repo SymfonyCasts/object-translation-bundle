@@ -27,9 +27,9 @@ class TranslationManagerTest extends KernelTestCase
         $this->manager = self::getContainer()->get('test.translation_manager');
     }
 
-    public function testGetTranslatableTypes(): void
+    public function testTranslatableTypes(): void
     {
-        $types = $this->manager->getTranslatableTypes();
+        $types = $this->manager->translatableTypes();
 
         $this->assertCount(1, $types);
         $this->assertInstanceOf(TranslatableTypeInfo::class, $types[0]);
