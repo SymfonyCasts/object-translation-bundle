@@ -41,9 +41,9 @@ final class TranslationManager
         return $this->mappingManager->translatableFieldsFor($objectOrClass);
     }
 
-    public function findTranslation(object $entity, string $locale, string $field): ?string
+    public function findTranslation(object $object, string $locale, string $field): ?string
     {
-        $translations = $this->findTranslations($entity, $locale);
+        $translations = $this->findTranslations($object, $locale);
 
         return $translations[$field] ?? null;
     }
@@ -51,27 +51,27 @@ final class TranslationManager
     /**
      * @return array<string, string> field => translated value
      */
-    public function findTranslations(object $entity, string $locale): array
+    public function findTranslations(object $object, string $locale): array
     {
-        $type = $this->mappingManager->translatableTypeFor($entity);
-        $id = $this->mappingManager->idFor($entity);
+        $type = $this->mappingManager->translatableTypeFor($object);
+        $id = $this->mappingManager->idFor($object);
 
         return $this->mappingManager->translationsFor($locale, $type, $id);
     }
 
-    public function saveTranslation(object $entity, string $locale, string $field, string $value): void
+    public function saveTranslation(object $object, string $locale, string $field, string $value): void
     {
-        $this->saveTranslations($entity, $locale, [$field => $value]);
+        $this->saveTranslations($object, $locale, [$field => $value]);
     }
 
     /**
      * @param array<string, string> $fields field => value
      */
-    public function saveTranslations(object $entity, string $locale, array $fields): void
+    public function saveTranslations(object $object, string $locale, array $fields): void
     {
-        $type = $this->mappingManager->translatableTypeFor($entity);
-        $id = $this->mappingManager->idFor($entity);
-        $unknownFields = array_diff(array_keys($fields), $this->mappingManager->translatableFieldsFor($entity));
+        $type = $this->mappingManager->translatableTypeFor($object);
+        $id = $this->mappingManager->idFor($object);
+        $unknownFields = array_diff(array_keys($fields), $this->mappingManager->translatableFieldsFor($object));
 
         if ($unknownFields) {
             throw new \InvalidArgumentException(sprintf('Fields "%s" of "%s" are not translatable.', implode('", "', $unknownFields), $type));
@@ -85,22 +85,22 @@ final class TranslationManager
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
-    public function deleteTranslation(object $entity, string $locale, string $field): void
+    public function deleteTranslation(object $object, string $locale, string $field): void
     {
-        $this->delete($entity, $locale, $field);
+        $this->delete($object, $locale, $field);
     }
 
-    public function deleteTranslationsFor(object $entity, ?string $locale = null): void
+    public function deleteTranslationsFor(object $object, ?string $locale = null): void
     {
-        $this->delete($entity, $locale);
+        $this->delete($object, $locale);
     }
 
-    public function translationStatusFor(object $entity, string $locale): TranslationStatus
+    public function translationStatusFor(object $object, string $locale): TranslationStatus
     {
-        $type = $this->mappingManager->translatableTypeFor($entity);
-        $id = $this->mappingManager->idFor($entity);
-        $allFields = $this->mappingManager->translatableFieldsFor($entity);
-        $translations = $this->findTranslations($entity, $locale);
+        $type = $this->mappingManager->translatableTypeFor($object);
+        $id = $this->mappingManager->idFor($object);
+        $allFields = $this->mappingManager->translatableFieldsFor($object);
+        $translations = $this->findTranslations($object, $locale);
 
         $translatedFields = [];
         $missingFields = [];
@@ -122,18 +122,18 @@ final class TranslationManager
         );
     }
 
-    public function invalidateCacheFor(object $entity, ?string $locale = null): void
+    public function invalidateCacheFor(object $object, ?string $locale = null): void
     {
-        $type = $this->mappingManager->translatableTypeFor($entity);
-        $id = $this->mappingManager->idFor($entity);
+        $type = $this->mappingManager->translatableTypeFor($object);
+        $id = $this->mappingManager->idFor($object);
 
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
-    private function delete(object $entity, ?string $locale, ?string $field = null): void
+    private function delete(object $object, ?string $locale, ?string $field = null): void
     {
-        $type = $this->mappingManager->translatableTypeFor($entity);
-        $id = $this->mappingManager->idFor($entity);
+        $type = $this->mappingManager->translatableTypeFor($object);
+        $id = $this->mappingManager->idFor($object);
 
         $this->mappingManager->delete($type, $id, $locale, $field);
         $this->mappingManager->flush();

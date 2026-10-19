@@ -183,7 +183,7 @@ final class TranslatableMappingManager
     }
 
     /**
-     * Doctrine proxies hide the entity's attributes and private properties.
+     * Doctrine proxies hide the real class's attributes and private properties.
      */
     private static function reflectionFor(object|string $objectOrClass): \ReflectionClass
     {
