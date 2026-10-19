@@ -68,6 +68,18 @@ class TranslationManagerTest extends KernelTestCase
         $this->assertNull($this->manager->findTranslation($entity, 'de', 'property1'));
     }
 
+    public function testDeleteTranslations(): void
+    {
+        $entity = persist(Entity1::class, ['property1' => 'v1']);
+        $this->manager->saveTranslation($entity, 'de', 'property1', 'de_v1');
+        $this->manager->saveTranslation($entity, 'fr', 'property1', 'fr_v1');
+
+        $this->manager->deleteTranslations($entity, 'de');
+
+        $this->assertSame([], $this->manager->findTranslations($entity, 'de'));
+        $this->assertSame(['property1' => 'fr_v1'], $this->manager->findTranslations($entity, 'fr'));
+    }
+
     public function testSaveTranslationsRejectsUnknownFields(): void
     {
         $entity = persist(Entity1::class, ['property1' => 'v1']);

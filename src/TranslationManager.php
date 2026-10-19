@@ -85,16 +85,14 @@ final class TranslationManager
         $this->cache->invalidateObject($type, $id, $locale);
     }
 
-    /**
-     * Deletes every field when $field is null.
-     */
-    public function deleteTranslation(object $entity, string $locale, ?string $field = null): void
+    public function deleteTranslation(object $entity, string $locale, string $field): void
     {
-        $type = $this->mappingManager->translatableTypeFor($entity);
-        $id = $this->mappingManager->idFor($entity);
+        $this->delete($entity, $locale, $field);
+    }
 
-        $this->mappingManager->delete($type, $id, $locale, $field);
-        $this->cache->invalidateObject($type, $id, $locale);
+    public function deleteTranslations(object $entity, string $locale): void
+    {
+        $this->delete($entity, $locale);
     }
 
     /**
@@ -166,5 +164,14 @@ final class TranslationManager
         foreach ($this->mappingManager->translatableTypes() as $type => $class) {
             yield $type => $this->mappingManager->idsFor($class);
         }
+    }
+
+    private function delete(object $entity, string $locale, ?string $field = null): void
+    {
+        $type = $this->mappingManager->translatableTypeFor($entity);
+        $id = $this->mappingManager->idFor($entity);
+
+        $this->mappingManager->delete($type, $id, $locale, $field);
+        $this->cache->invalidateObject($type, $id, $locale);
     }
 }
