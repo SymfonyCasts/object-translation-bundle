@@ -5,6 +5,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use SymfonyCasts\ObjectTranslationBundle\Command\ObjectTranslationExportCommand;
 use SymfonyCasts\ObjectTranslationBundle\Command\ObjectTranslationImportCommand;
 use SymfonyCasts\ObjectTranslationBundle\Command\ObjectTranslationWarmupCommand;
+use SymfonyCasts\ObjectTranslationBundle\Form\ObjectTranslationType;
 use SymfonyCasts\ObjectTranslationBundle\ObjectTranslator;
 use SymfonyCasts\ObjectTranslationBundle\TranslationCache;
 use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
@@ -69,5 +70,12 @@ return static function (ContainerConfigurator $container) {
 
         ->set('.symfonycasts.object_translator.twig_extension', ObjectTranslatorExtension::class)
             ->tag('twig.extension')
+
+        ->set('.symfonycasts.object_translator.form_type', ObjectTranslationType::class)
+            ->args([
+                service('symfonycasts.object_translation_manager'),
+                service('.symfonycasts.object_translator.mapping_manager'),
+            ])
+            ->tag('form.type')
     ;
 };

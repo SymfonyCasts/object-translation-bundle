@@ -31,11 +31,14 @@ class TestKernel extends Kernel
     {
         $container->services()->set('logger', NullLogger::class);
 
-        // nothing uses the manager, so it would be removed from the container
+        // nothing uses these, so they would be removed from the container
         $container->services()->alias('test.translation_manager', TranslationManager::class)->public();
+        $container->services()->alias('test.form_factory', 'form.factory')->public();
 
         $builder->loadFromExtension('framework', [
             'test' => true,
+            'form' => true,
+            'property_access' => true,
             'enabled_locales' => ['en', 'de', 'fr'],
             'cache' => [
                 'pools' => [
