@@ -304,6 +304,122 @@ app's enabled locales.
 symfony console object-translation:warmup
 ```
 
+## Cookbook
+
+### Translating Entities in EasyAdmin
+
+Add a "Translate" action to your [EasyAdmin](https://github.com/EasyCorp/EasyAdminBundle)
+CRUD controller that renders an `ObjectTranslationType` form for each of your app's
+enabled locales, except the default one:
+
+```php
+// src/Controller/Admin/ProductCrudController.php
+
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use SymfonyCasts\ObjectTranslationBundle\Form\ObjectTranslationType;
+use SymfonyCasts\ObjectTranslationBundle\TranslationManager;
+
+class ProductCrudController extends AbstractCrudController
+{
+    // ...
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $translate = Action::new('translate', 'Translate', 'fa fa-language')
+            ->linkToCrudAction('translate');
+
+        return $actions
+            ->add(Crud::PAGE_INDEX, $translate)
+            ->add(Crud::PAGE_DETAIL, $translate)
+            ->add(Crud::PAGE_EDIT, $translate);
+    }
+
+    #[AdminRoute('/{entityId}/translate/{locale?}')]
+    public function translate(
+        AdminContext $context,
+        Request $request,
+        TranslationManager $translationManager,
+
+        #[Autowire('%kernel.enabled_locales%')]
+        array $enabledLocales,
+
+        #[Autowire('%kernel.default_locale%')]
+        string $defaultLocale,
+        ?string $locale = null,
+    ): Response {
+        // the default locale holds the original values, so it is not translated
+        $locales = array_values(array_diff($enabledLocales, [$defaultLocale]));
+        $product = $context->getEntity()->getInstance();
+        $locale ??= $locales[0];
+
+        if (!in_array($locale, $locales, true)) {
+            throw $this->createNotFoundException(sprintf('Locale "%s" is not enabled.', $locale));
+        }
+
+        $form = $this->createForm(ObjectTranslationType::class, options: [
+            'object' => $product,
+            'locale' => $locale,
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $translationManager->saveTranslationsFor($product, $locale, $form->getData());
+            $this->addFlash('success', sprintf('"%s" translations saved.', $locale));
+
+            return $this->redirect($request->getUri());
+        }
+
+        return $this->render('admin/translate.html.twig', [
+            'form' => $form,
+            'locale' => $locale,
+            'locales' => $locales,
+            'status' => $translationManager->translationStatusFor($product, $locale),
+        ]);
+    }
+}
+```
+
+The template extends EasyAdmin's layout, uses its form theme, links back to the edit page
+and links to the same action for each locale:
+
+```twig
+{# templates/admin/translate.html.twig #}
+
+{% extends '@EasyAdmin/page/content.html.twig' %}
+{% form_theme form with ['@EasyAdmin/crud/form_theme.html.twig'] only %}
+
+{% block content_title %}Translate "{{ ea.entity }}"{% endblock %}
+
+{% block page_actions %}
+    <a class="btn btn-secondary" href="{{ ea_url().setAction('edit').unset('locale') }}">Back to {{ ea.entity }}</a>
+{% endblock %}
+
+{% block main %}
+    <ul class="nav nav-tabs mb-3">
+        {% for l in locales %}
+            <li class="nav-item">
+                <a class="nav-link {{ l == locale ? 'active' }}" href="{{ ea_url().set('locale', l) }}">{{ l }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p>{{ status.translatedFields|length }} of {{ (status.translatedFields|length) + (status.missingFields|length) }} fields translated</p>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button type="submit" class="btn btn-primary">Save</button>
+    {{ form_end(form) }}
+{% endblock %}
+```
+
 ## Full Default Configuration
 
 ```yaml
